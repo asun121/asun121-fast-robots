@@ -76,7 +76,7 @@
                 <div class="d-flex flex-column flex-md-row justify-content-between mb-5">
                     <div class="flex-grow-1">
                         <h3 class="mb-0">Prelab</h3>
-                        <p>We first setup the Arduino IDE along with the Sparkful Apollo3 board manager. This allows us
+                        <p>We first download the Arduino IDE along with the Sparkful Apollo3 board manager. This allows us
                             to program our
                             Artemis board!
                         </p>
@@ -100,7 +100,8 @@
                         <h3 class="mb-0">Serial</h3>
                         <p>We then check the serial communication between our board and the serial monitor. We can see
                             messages being echoed back when
-                            we communnicate through serial.
+                            we communnicate through the serial monitor. This allows us to print debug statements as well as 
+                            read critical information of the board.
                         </p>
 
                         <iframe width="420" height="315"
@@ -115,7 +116,13 @@
                             the example,
                             we get the following output:
                         </p>
+                        <iframe width="420" height="315"
+                            src="https://www.youtube.com/embed/hsiZJkdgAKU?si=dSAcgX2kN-r-Etwl">
+                        </iframe>
 
+                        <p>The temperature sensor is connected to an onboard ADC which allows it to convert analog readings
+                            to digital values. This is then printed to the serial monitor for us to read.
+                        </p>
                     </div>
                 </div>
 
@@ -124,7 +131,8 @@
                     <div class="flex-grow-1">
                         <h3 class="mb-0">Microphone Output</h3>
                         <p>By playing keys on a piano, we can change the maximum frequency read by the onboard
-                            microphone. We can see the output change as we play different notes.
+                            microphone. We can see the output change as we play different notes. This illustrates the pulse density microphone on 
+                            the Artemis board which converts the analog signal to binary with an FFT computation.
                         </p>
 
                         <iframe width="420" height="315"
@@ -143,8 +151,42 @@
                     <div class="flex-grow-1">
                         <h3 class="mb-0">Prelab</h3>
                         <p>Before running commands, we need to setup our environment to be able to connect to the
-                            Artemis.
+                            Artemis. We start by installing a virtual environment for Python with with the following
+                            commands:
                         </p>
+
+                        <code> python3 -m pip install --user virtualenv
+                        </code>
+                        <br>
+
+                        <code>  python3 -m venv FastRobots_ble
+                        </code>
+
+                        <br>
+                        <br>
+
+                        <p>Launching our virtual environment gives us the following:
+                        </p>
+                        <image src="assets/img/lab1/venv.png" alt="venv" width="600" class="center-image"> 
+
+                        <br>
+
+                        <p>We then connect our Artemis to our computer through BLE. The below shows the advertised
+                            MAC address of the Artemis. After getting the MAC address, we can connect to the Artemis after 
+                            configuring the UIUDs of the Artemis to match on the computer and board. We set all of the connection
+                            information in the jupyter lab notebook.
+                        </p>
+
+                        <img src="assets/img/lab1/mac.png" alt="ble" width="600" class="center-image">
+                        <br>
+                        <img src="assets/img/lab1/co.png" alt="ble" width="600" class="center-image">
+
+                        <br>
+
+                        
+                        <p>Once all the proper configurations are made, we can finally connect to the Artemis board!
+                        </p>
+                        <img src="assets/img/lab1/connect.png" alt="ble" width="600" class="center-image">
                     </div>
                 </div>
 
@@ -213,8 +255,10 @@
                 <div class="d-flex flex-column flex-md-row justify-content-between">
                     <div class="flex-grow-1">
                         <h3 class="mb-0">Task 3</h3>
-                        <p>To easier debug in the future, we need to implement a way to receive timing information from the 
-                            board. We implement the GET_TIME_MILLIS command to return the current time in milliseconds tracked
+                        <p>To easier debug in the future, we need to implement a way to receive timing information from
+                            the
+                            board. We implement the GET_TIME_MILLIS command to return the current time in milliseconds
+                            tracked
                             by the Artemis board. This is sent through BLE to our computer.
                         </p>
                         <style>
@@ -229,12 +273,14 @@
 
                         <br>
 
-                        <p>The above shows the code on the Arduino side. We create a temporary buffer to store the string of the 
-                            current time in milliseconds. We then send this string through BLE by writing to the characteristic. The 
+                        <p>The above shows the code on the Arduino side. We create a temporary buffer to store the
+                            string of the
+                            current time in milliseconds. We then send this string through BLE by writing to the
+                            characteristic. The
                             output on the computer side is shown below:
                         </p>
                         <img src="assets/img/lab1/get time millis lab.png" alt="get time millis" width="600"
-                        class="center-image">
+                            class="center-image">
 
 
 
@@ -242,6 +288,187 @@
                 </div>
 
 
+                <div class="d-flex flex-column flex-md-row justify-content-between">
+                    <div class="flex-grow-1">
+                        <h3 class="mb-0">Task 4</h3>
+                        <p>
+                            After implementing the GET_TIME_MILLIS command, we implement a notification handler. This
+                            allows our computer to automatically parse
+                            the data sent from the Artemis board. We implement a simple notification handler that prints
+                            timing data with the code shown below:
+                        </p>
+                        <style>
+                            .center-image {
+                                display: block;
+                                margin-left: auto;
+                                margin-right: auto;
+                            }
+                        </style>
+
+                        <img src="assets/img/lab1/notif handler.png" alt="get time millis" width="900"
+                            class="center-image">
+                        <br>
+
+                        <p>
+                            In the above, we see that when sending the GET_TIME_MILLIS command, we can see the timestamp
+                            is printed right when the board sends back the data.
+                        </p>
+
+
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column flex-md-row justify-content-between">
+                    <div class="flex-grow-1">
+                        <h3 class="mb-0">Task 5</h3>
+                        <p>
+
+                        </p>
+                        <style>
+                            .center-image {
+                                display: block;
+                                margin-left: auto;
+                                margin-right: auto;
+                            }
+                        </style>
+
+                        <p>
+                            To determine how fast timestamp messages can be sent, we will implement a loop that
+                            continuously sends timestamps
+                            in Arduino to our computer.
+                        </p>
+
+                        <img src="assets/img/lab1/loop time.png" alt="loop" width="700" class="center-image">
+                        <br>
+                        <p>
+                            We read this output in jupyter lab. By reading the amount of sent timestamps for 5 seconds
+                            of messages, we can calculate the amount
+                            of messages sent per second.
+                            We can see that the timestamps are sent at a rate of 44.8 messages per second.
+
+                        </p>
+                        <img src="assets/img/lab1/notify loop.png" alt="loop" width="900" class="center-image">
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column flex-md-row justify-content-between">
+                    <div class="flex-grow-1">
+                        <h3 class="mb-0">Task 6</h3>
+                        <p>
+
+                        </p>
+                        <style>
+                            .center-image {
+                                display: block;
+                                margin-left: auto;
+                                margin-right: auto;
+                            }
+                        </style>
+
+                        <p>
+                            Here, we implement a command that will generate an array of timestamps before sending the
+                            entire array. We do this by looping
+                            over a predefined array size and populating the array with the proper timestamps. The
+                            datapoints are then looped over and sent
+                            to the computer.
+                        </p>
+
+                        <br>
+                        <img src="assets/img/lab1/send time data.png" alt="loop" width="600" class="center-image">
+                        <br>
+
+                        <p>
+                            On the python side, we implement a notification handler that will store each datapoint in an
+                            array. We can find that the
+                            amount of data points sent matches the amount of datapoints on the Arduino side meaning all
+                            data is sent correctly.
+                        </p>
+
+                        <img src="assets/img/lab1/loop time python.png" alt="loop" width="750" class="center-image">
+                    </div>
+                </div>
+
+
+                <div class="d-flex flex-column flex-md-row justify-content-between">
+                    <div class="flex-grow-1">
+                        <h3 class="mb-0">Task 7</h3>
+                        <p>
+
+                        </p>
+                        <style>
+                            .center-image {
+                                display: block;
+                                margin-left: auto;
+                                margin-right: auto;
+                            }
+                        </style>
+
+                        <p>
+                            We also want to receive temperature readings from the board. Here we implement a command
+                            that sends an array of
+                            temperature readings along with an array of corresponding timestamps. The below shows the
+                            Arduino code
+                            which generates 2 arrays, one of timestamps and one of temperature readings in Fahrenheit.
+                            We then send these arrays to the computer
+                            through BLE by sending the temp and time values separated by a "|".
+                        </p>
+
+                        <br>
+                        <img src="assets/img/lab1/temp code.png" alt="temp" width="600" class="center-image">
+                        <br>
+
+                        <p>
+                            On the python side, we use a similar notification handler that will store each datapoint in
+                            an array. We parse each string received by the
+                            separator "|" and store the values in their respective arrays. By printing the arrays, we
+                            can see the timestamps and corresponsing temperature values.
+                        </p>
+
+                        <img src="assets/img/lab1/temp readings.png" alt="loop" width="750" class="center-image">
+                    </div>
+                </div>
+                <br>
+
+                <div class="d-flex flex-column flex-md-row justify-content-between">
+                    <div class="flex-grow-1">
+                        <h3 class="mb-0">Task 8: Discussion</h3>
+                        <p>
+
+                        </p>
+                        <style>
+                            .center-image {
+                                display: block;
+                                margin-left: auto;
+                                margin-right: auto;
+                            }
+                        </style>
+
+                        <p>
+                            Comparing the two methods of sending data, the first being sending data live as it is
+                            recorded and the second is storing the data and sending it all at once.
+                            While in the first method we are able to get real time information, the sampling rate is
+                            limited by the amount of data that can be sent over BLE. In the second method,
+                            we are able to sample data at a faster rate however cannot send data in real time. In this
+                            method, we can record data as quickly as the sensor can sample then send the entire
+                            array at once. In that require real time data and debugging, the first method is preferred.
+                            However, if we are looking for high sample sizes with lots of resolution, method 2 is
+                            preferred.
+                        </p>
+                        <br>
+                        <p>
+                            Given the Artemis has 384kB of RAM and unsigned longs take 4 bytes of space, we are able to
+                            store 96000 datapoints. In the case of storing temperature and time readings,
+                            we can store a total of 48000 sample points.
+                        </p>
+                        <br>
+                        <p>
+                            This lab was a great introduction to the Artemis board and how to communicate with it. In addition,
+                            I became familiar with the BLE communication and the general debugging process with the Artemis.
+                            Understanding how to use the serial monitor will be a good skill when debugging in the future.
+                        </p>
+
+                    </div>
+                </div>
             </div>
         </section>
         <hr class="m-0" />
