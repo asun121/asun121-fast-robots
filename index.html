@@ -33,6 +33,7 @@
             <ul class="navbar-nav">
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#about">About</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 1">Lab 1</a></li>
+                <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 2">Lab 2</a></li>
 
             </ul>
         </div>
@@ -76,7 +77,8 @@
                 <div class="d-flex flex-column flex-md-row justify-content-between mb-5">
                     <div class="flex-grow-1">
                         <h3 class="mb-0">Prelab</h3>
-                        <p>We first download the Arduino IDE along with the Sparkful Apollo3 board manager. This allows us
+                        <p>We first download the Arduino IDE along with the Sparkful Apollo3 board manager. This allows
+                            us
                             to program our
                             Artemis board!
                         </p>
@@ -100,7 +102,8 @@
                         <h3 class="mb-0">Serial</h3>
                         <p>We then check the serial communication between our board and the serial monitor. We can see
                             messages being echoed back when
-                            we communnicate through the serial monitor. This allows us to print debug statements as well as 
+                            we communnicate through the serial monitor. This allows us to print debug statements as well
+                            as
                             read critical information of the board.
                         </p>
 
@@ -120,7 +123,8 @@
                             src="https://www.youtube.com/embed/hsiZJkdgAKU?si=dSAcgX2kN-r-Etwl">
                         </iframe>
 
-                        <p>The temperature sensor is connected to an onboard ADC which allows it to convert analog readings
+                        <p>The temperature sensor is connected to an onboard ADC which allows it to convert analog
+                            readings
                             to digital values. This is then printed to the serial monitor for us to read.
                         </p>
                     </div>
@@ -131,7 +135,8 @@
                     <div class="flex-grow-1">
                         <h3 class="mb-0">Microphone Output</h3>
                         <p>By playing keys on a piano, we can change the maximum frequency read by the onboard
-                            microphone. We can see the output change as we play different notes. This illustrates the pulse density microphone on 
+                            microphone. We can see the output change as we play different notes. This illustrates the
+                            pulse density microphone on
                             the Artemis board which converts the analog signal to binary with an FFT computation.
                         </p>
 
@@ -167,26 +172,28 @@
 
                         <p>Launching our virtual environment gives us the following:
                         </p>
-                        <image src="assets/img/lab1/venv.png" alt="venv" width="600" class="center-image"> 
+                        <image src="assets/img/lab1/venv.png" alt="venv" width="600" class="center-image">
 
-                        <br>
+                            <br>
 
-                        <p>We then connect our Artemis to our computer through BLE. The below shows the advertised
-                            MAC address of the Artemis. After getting the MAC address, we can connect to the Artemis after 
-                            configuring the UIUDs of the Artemis to match on the computer and board. We set all of the connection
-                            information in the jupyter lab notebook.
-                        </p>
+                            <p>We then connect our Artemis to our computer through BLE. The below shows the advertised
+                                MAC address of the Artemis. After getting the MAC address, we can connect to the Artemis
+                                after
+                                configuring the UIUDs of the Artemis to match on the computer and board. We set all of
+                                the connection
+                                information in the jupyter lab notebook.
+                            </p>
 
-                        <img src="assets/img/lab1/mac.png" alt="ble" width="600" class="center-image">
-                        <br>
-                        <img src="assets/img/lab1/co.png" alt="ble" width="600" class="center-image">
+                            <img src="assets/img/lab1/mac.png" alt="ble" width="600" class="center-image">
+                            <br>
+                            <img src="assets/img/lab1/co.png" alt="ble" width="600" class="center-image">
 
-                        <br>
+                            <br>
 
-                        
-                        <p>Once all the proper configurations are made, we can finally connect to the Artemis board!
-                        </p>
-                        <img src="assets/img/lab1/connect.png" alt="ble" width="600" class="center-image">
+
+                            <p>Once all the proper configurations are made, we can finally connect to the Artemis board!
+                            </p>
+                            <img src="assets/img/lab1/connect.png" alt="ble" width="600" class="center-image">
                     </div>
                 </div>
 
@@ -462,14 +469,262 @@
                         </p>
                         <br>
                         <p>
-                            This lab was a great introduction to the Artemis board and how to communicate with it. In addition,
-                            I became familiar with the BLE communication and the general debugging process with the Artemis.
-                            Understanding how to use the serial monitor will be a good skill when debugging in the future.
+                            This lab was a great introduction to the Artemis board and how to communicate with it. In
+                            addition,
+                            I became familiar with the BLE communication and the general debugging process with the
+                            Artemis.
+                            Understanding how to use the serial monitor will be a good skill when debugging in the
+                            future.
                         </p>
 
                     </div>
                 </div>
             </div>
+        </section>
+
+        <section class="resume-section" id="Lab 2">
+            <div class="resume-section-content">
+
+                <h2 class="mb-0">Lab 2</h2>
+                <p>In this lab, we will setup the IMU and connect it to our Artemis board via I2C. We will then
+                    implement
+                    chart the data from the IMU and configure all of the sensors onboard. Once configured, we experiment
+                    with various filtering techniques to improve the data quality.
+                </p>
+
+                <div class="d-flex flex-column flex-md-row justify-content-between">
+                    <div class="flex-grow-1">
+                        <h3 class="mb-0">Setup the IMU</h3>
+                        <p>Before coding up this lab, we need to setup our IMU. We begin by installing the SparkFun 9DOF
+                            IMU
+                            Arduino library. This allows us to easily interface with the IMU and get readings. We then
+                            run
+                            the basic example
+                            program. In the program we notice the AD0 pin setting. According to the datasheet, this
+                            allows
+                            us to control the I2C address of
+                            our IMU. We use a setting of 0 for our IMU. We see that with the basic example code we see
+                            the IMU data being printed to the serial monitor, confirming that our setup is correct.
+                        </p>
+
+                        <iframe width="560" height="315"
+                            src="https://www.youtube.com/embed/iZ6U_HNlIPM?si=eyfiqiNmTerWM8kn" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen style="display: block; margin-left: auto; margin-right: auto;"></iframe>
+
+                        <br>
+
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column flex-md-row justify-content-between">
+                    <div class="flex-grow-1">
+                        <h3 class="mb-0">Accelerometer</h3>
+                        <p>With our table as a guide, we can see the accelerometer readings at -90, 90 and 0, 0 (pitch,
+                            roll). We
+                            utilize the Arduino serial plotter to find the following graphs.
+                        </p>
+
+                        <img src="assets/img/lab2/-90 90.png" alt="IMU at -90, 90 degrees" width="600"
+                            class="center-image">
+                        <p class="text-center">IMU at -90, 90 degrees</p>
+
+                        <img src="assets/img/lab2/0 0.png" alt="IMU at 0, 0 degrees" width="600" class="center-image">
+                        <p class="text-center">IMU at 0, 0 degrees</p>
+                        <br>
+
+                        <p>We can also calibrate out some noise by doing a two point conversion. This will help reduce
+                            the offset and scale errors in the accelerometer readings, providing more accurate data for
+                            our measurements and experiments. By taking the roll values at two endpoints, we can compare
+                            our sensor to an ideal accelerometer
+                        </p>
+
+                        <img src="assets/img/lab2/twopt calibration compared.png"
+                            alt="Roll at -90 and 90 (Ideal: Purple, Real: Green)" width="600" class="center-image">
+                        <p class="text-center">Roll at -90 and 90 (Ideal: Purple, Real: Green)</p>
+
+                        <br>
+
+                        <p>While this offset may be due to tilting of the table or edge, we can still find the
+                            conversion factor between the two to be 1 / 0.952 with the formula:
+
+                        </p>
+                        <p style="text-align: center;"><strong>S = (I<sub>2</sub> - I<sub>1</sub>) / (R<sub>2</sub> /
+                                R<sub>1</sub>)</strong></p>
+
+                        <p>We can now analyze our IMU data in the time and frequency domains. We first try to analyze
+                            the passive noise
+                            from the accelerometer by taking a sample and plotting the data in time and frequency. At a
+                            sampling frequency
+                            of 480 Hz, we can see little noise except for a small spike around 30-40 Hz.
+                            Using a cutoff frequency of 35 Hz, we can compute the value of alpha for a low-pass filter
+                            using the formula:
+                            alpha = cutoff_frequency / (cutoff_frequency + sampling_frequency / 2 * pi).
+                            For a cutoff frequency of 35 Hz and a sampling frequency of 480 Hz, we pick an alpha of
+                            roughly 0.2
+                        </p>
+                        <img src="assets/img/lab2/time domain no vibration.png" width="1000" class="center-image"
+                            alt="Time domain and Frequency domain graph of IMU Pitch around 0 degrees">
+                        <p class="text-center">Time domain and frequency domain graph of IMU pitch around 0 degrees</p>
+                        <p>Upon analyzing our passive noise, we add some active noise to the system by vibrating our
+                            table. Again we see relatively consistent
+                            amplitudes with a small spike around 30-40 Hz.
+                        </p>
+
+                        <img src="assets/img/lab2/time domain vibrations.png" width="1000" class="center-image"
+                            alt="Time domain and Frequency domain graph of IMU Pitch around 0 degrees">
+                        <p class="text-center">Time domain and frequency domain graph of IMU pitch around 0 degrees with
+                            vibration</p>
+                        <br>
+                        <p>With the alpha value calculated, we can implement a low-pass filter to reduce the noise in
+                            our data. We use the code below, taking the previous value of pitch and multipling it by
+                            (1 - alpha) and adding the current value of pitch multiplied by alpha.
+                            We can see that the low-pass filter does a good job of reducing the noise in our data when
+                            plotting our
+                            unfiltered and filtered responses on top of each other.
+                        </p>
+                        <pre style="text-align: center;"></pre>
+                        <code>
+                        temps_lpf[i] = a * pitch + prev_lpf * (1 - a);
+                        </code>
+                        <br>
+                        <code>
+                        prev_lpf = temps_lpf[i];
+                        </code>
+                        <br>
+                        <br>
+
+                        </pre>
+                        <img src="assets/img/lab2/lpf pitch vs non lpf same graph.png" width="1000" class="center-image"
+                            alt="Low-pass filter applied to IMU data">
+                        <p class="text-center">Low-pass filter applied to IMU data compared to unfiltered</p>
+
+                    </div>
+                </div>
+
+                <div class="flex-grow-1">
+                    <h3 class="mb-0">Gyroscope</h3>
+                    <p>We can compare values from our accelerometer to our gyroscope. While the gyroscope readings
+                        are smoother, they are much more susceptible to drift. This is due to the fact that errors will
+                        accumulate on the gyroscope as it measures angular velocity. The accelerometer on the other hand
+                        will drift less however is more susceptible to noise. We use the following equations to compute
+                        our gyroscope angles for roll and pitch which we can compare to the accelerometer angles.
+                    </p>
+                    <p style="text-align: center;"><strong>Roll = Roll + (GyroX * dt)</strong></p>
+                    <p style="text-align: center;"><strong>Pitch = Pitch + (GyroY * dt)</strong></p>
+
+                    <img src="assets/img/lab2/pitch gyro vs pitch accel high sample.png" width="1000"
+                        class="center-image" alt="Gyroscope Roll vs Accelerometer Roll">
+                    <p class="text-center">Gyroscope Pitch vs Accelerometer Pitch</p>
+
+                    <img src="assets/img/lab2/roll lpf vs gyro.png" width="1000" class="center-image"
+                        alt="Gyroscope Roll vs Accelerometer Roll">
+                    <p class="text-center">Gyroscope Pitch vs Accelerometer Pitch</p>
+                    <p> From the graphs, we can tell that the gyroscope is much more susceptible to drift.
+                        We can also see that the gyroscope is very smooth, comparable to the LPF. It does not
+                        suffer the same spikes as the raw accelerometer data. We are also able to change the sampling
+                        rate of
+                        our IMU to see the effects on the data. We can see that lowering the sampling rate, causes
+                        significant increase in gyroscope drift
+                        and decrease in data smoothness.
+                    </p>
+
+                    <img src="assets/img/lab2/low sample rate pitch.png" width="1000" class="center-image"
+                        alt="Gyroscope Pitch vs Accelerometer Pitch Low Sample Rate">
+
+                    <p class="text-center">Gyroscope Roll vs Accelerometer Roll Low Sample Rate</p>
+                    <br>
+                    <p> We can also implement a complementary filter to combine the two sensors. The complementary
+                        filter uses a weighted average of the two sensors to get a more accurate reading. We can
+                        implement this with the following code:
+                    </p>
+                    <img src="assets/img/lab2/compl code.png" width="750" class="center-image"
+                        alt="Gyroscope Roll vs Accelerometer Roll">
+                    <p>This give us the following graph. We notice that our drift issues are gone, as we are able to
+                        rezero both pitch and roll to a fixed point in the graph. We weigh our filter in favor of the
+                        accelerometer
+                        which means we still have vibrations, however we see less noise than the raw pitch and roll from
+                        accelerometer and this can be fixed by further tuning the weights.
+                    </p>
+                    <img src="assets/img/lab2/comple.png" width="1000" class="center-image"
+                        alt="Gyroscope Roll vs Accelerometer Roll">
+                </div>
+                <br>
+                <br>
+
+                <div class="flex-grow-1">
+                    <h3 class="mb-0">Increasing Sampling Rate</h3>
+                    <p>To increase our sampling rate, we remove our IMU checks. While before we would check if IMU data
+                        was
+                        ready, now we simply execute our measurements. We also remove all measurements to the serial
+                        monitor in
+                        our main loop providing the following main loop. In this loop, we simply measure the IMU
+                        data and store it in temporary arrays. These arrays are then sent to the computer after
+                        measurements
+                        have finished.
+                    </p>
+                    <img src="assets/img/lab2/increase sample rate code.png" width="700" class="center-image"
+                        alt="Gyroscope Roll vs Accelerometer Roll">
+                    <br>
+                    <p>Over a sample size of 500 datapoints containing complementary roll and pitch along with yaw
+                        from the gyro, we are able to achieve a sampling rate of 233 samples / second. Interestingly,
+                        this
+                        sampling rate is not as high as the IMU sample rate. When looking at the output data, we rarely
+                        see repeat values. This means that the IMU is sampling faster than we can read. In addition, the
+                        datasheet
+                        states that the gyro and accelerometer have a max output datarate of 9khz and 4.5khz
+                        respectively, much
+                        faster than our sample rate.
+                    </p>
+
+                    <p>
+                        The following code allows us to record 5 seconds of data and send all of the data from the
+                        Artemis to our
+                        computer. The 3 values we send are the complementary roll and pitch along with the gyro yaw.
+                    </p>
+                    <img src="assets/img/lab2/5 sec code.png" width="700" class="center-image">
+                    <p>
+                        We confirm that all the values are being sent correctly by printing the timestamps on our python
+                        side.
+                        We see the time starts at 28922 and ends at 33920, confirming that we are able to record a full
+                        5 seconds of data
+                    </p>
+                    <img src="assets/img/lab2/5 second.png" width="700" class="center-image">
+                    <h3 class="mb-0">Array Storage</h3>
+                    <p>A consideration we need to make is how to store our data, whether have one large array or
+                        multiple small
+                        arrays. We decide to choose having separate arrays for each value. This reduces code complexity
+                        as instead
+                        of having to parse each value of the array when sending and reading, we can send values
+                        individually. This
+                        also allows for increased flexibility as we can easily choose to only send a specific set of
+                        values.
+                    </p>
+                    <br>
+                    <p>Considering the memory of the array, we want to minimize the space our datatypes take. For
+                        timestamps, we
+                        use 4 byte ints in order to store the top end of millisecond values. For pitch, roll and yaw, we
+                        require
+                        floats for floating point precision. These are each 4 bytes. In total, each message takes 16
+                        bytes to store.
+
+                        Given the artemis has 384kB of RAM, we can store a maximum of 24000 messages. With the
+                        previously calculated
+                        sampling rate of 233 samples / second, we can store a maximum of 103 seconds of data.
+                    </p>
+                </div>
+                <div class="flex-grow-1">
+                    <h3 class="mb-0">Stunt!</h3>
+                    <p align="center"></p>
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/5LgCVwthD_Q?si=SfpKQLyygGnvWBMN"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen></iframe>
+                    </p>
+
+                    <p>Driving the car around is really fun! My stunt includes doing some flips and drifting the car around.
+                    </p>
+                </div>
         </section>
         <hr class="m-0" />
 
