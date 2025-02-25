@@ -34,6 +34,7 @@
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#about">About</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 1">Lab 1</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 2">Lab 2</a></li>
+                <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 3">Lab 3</a></li>
 
             </ul>
         </div>
@@ -481,6 +482,7 @@
                 </div>
             </div>
         </section>
+        <hr class="m-0" />
 
         <section class="resume-section" id="Lab 2">
             <div class="resume-section-content">
@@ -720,13 +722,132 @@
                         frameborder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowfullscreen></iframe>
-                    </p>
 
                     <p>Driving the car around is really fun! My stunt includes doing some flips and drifting the car around.
                     </p>
                 </div>
         </section>
+
+
         <hr class="m-0" />
+
+        
+        <section class="resume-section" id="Lab 3">
+            <div class="resume-section-content">
+                <h2 class="mb-0">Lab 3</h2>
+                <p>The purpose of this lab is to setup our ToF sensors onboard the robot. This will be done through I2C and we will 
+                    be able to read the distance from the sensors. We attach to ToF sensors, configure them, and test them to 
+                    ensure they are working properly.
+                </p>
+            <div class="d-flex flex-column flex-md-row justify-content-between">
+                <div class="flex-grow-1">
+                    <h3 class="mb-0">Prelab</h3>
+                    <p> 
+                        Before beginning this lab, we need to install the VL53L1X library through the Arduino library manager.
+                        Once installed, we must setup the I2C address of the sensors. Looking at the datasheet, we can see
+                        the default I2C address is 0x52. Because we have 2 sensors, we need to change the I2C address of one of the sensors.
+
+                    </p>
+                    <img src="assets/img/lab3/i2c address.png" width="700" class="center-image">
+                    <br>
+                    <br>
+
+                    <p> 
+                        To change one of the I2C addresses, we can use the XSHUT pin onboard the ToF sensor to temporary shutdown a sensor. By shutting down 
+                        one ToF sensor, we can change the I2C address of the other sensor. Once both sensors restart, they will have unique addresses.
+                        This is significantly simpler than having to continuosly switch them on and off at runtime, as the addresses will just remain unique. 
+                    </p>
+                    <figure>
+                        <img src="assets/img/lab3/circuit diag.png" width="700" class="center-image">
+                        <figcaption style="text-align: center;">Wiring diagram of our Artemis with both ToF attached. We utilize the multi-qwiic connector
+                            to connect both ToF sensors to the Artemis.
+                        </figcaption>
+                    </figure>
+
+                    <p> 
+
+                        We also must determine where to place the ToF sensors on the robot. We mainly want to detect for obstacles in the forward
+                        direction so we place a sensor at the front. the second sensor is placed on the right side. The majority of our turns will
+                        be right turns so having a sensor on the right side will help us detect for obstacles when turning. We will miss obstacles to our 
+                        direct left however this is not a major concern.
+                    </p>
+                    <img src="assets/img/lab3/tof diag.png" width="400" class="center-image">
+                    <h3 class="mb-0">Hardware Setup</h3>
+                    <p> 
+                        We begin by wiring up our ToF sensors to our Artemis board. We also need to solder the XSHUT pin of one of the ToF sensors to the Artemis
+                        </p>
+                        <img src="assets/img/lab3/IMG_1472.png" width="400" class="center-image">
+                    <br>
+                    <p>
+                        We then run the example code I2C code. This will ensure that our Artemis can detect the 
+                        sensor over I2C. Interestingly, we see that the detected address is 0x29, which is different 
+                        than our default address. This is because the LSB of an I2C address is reserved for the read/write bit.
+                        By shifting one bit left, the address we see is 0x52, which is the default address of the ToF sensor.
+                    </p>
+                    <img src="assets/img/lab3/x29 detected.png" width="600" class="center-image">
+                    <h3 class="mb-0">Testing the Sensor</h3>
+                    <p> 
+                        Our I2C sensor has 3 modes of sensitivity: short, medium and long. We can set the mode by using the setDistanceMode function.
+                        Long distance is optimized around 4m, medium around 3m and short around 1.3m. For our case,
+                        we will be using the short distance mode as we are operating in smaller environments and need accurate readings at short distances to
+                        avoid obstacles. The below video shows us testing the ToF sensor and reading the output in the serial monitor
+                    </p>
+
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/wRK5-IOUFDs?si=SrVONUDDM_ipoPKf"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen></iframe>
+
+                        <p> 
+                            We want to test the accuracy and precision of our ToF sensor. We can do this by measuring the distance of a wall
+                            at various distances. We can then compare the output of the ToF sensor to the actual distance. To make sure our
+                            measurements are precise, we repeat this process 3 times to make sure we are getting consistent readings. 
+                        </p>
+                        <img src="assets/img/lab3/annotated.png" width="600" class="center-image">
+                        <br>
+                        <p> 
+                            Over 3 trials, we notice we get very consistent readings across 0 - 1.2m, the range
+                            of the short distance operation with an average of 100 samples per sample point. We notice a slight dropoff
+                            in precision above 1m, where trial 3 and trial 2 skew from linear. 
+                        </p>
+
+                        <img src="assets/img/lab3/chart measure.png" width="600" class="center-image">
+
+                        <p> Our next test consists of trialing the maximum speed we can run our code at with the ToF. 
+                            We do this by only polling the ToF when both sensors are ready, else we simply
+                            skip the measurement. At each timestep, we print the time it took between the last iteration of the code.
+                        </p>
+                        <img src="assets/img/lab3/time stamps.png" width="600" class="center-image">
+                        <br>
+                        <p> Above we see the printed timestamps. We notice that for every 10 iterations, there is one ToF measurement which takes
+                            15ms. All other iterations take 5ms. This gives us an average loop time of 6ms. The current limiting factor is the time it takes
+                            to read the ToF sensor, as it is not ready every iteration. Therefore, we must make sure not to block on the ToF 
+                            every iteration as it will slow down our code significantly.
+                        </p>
+
+                        <p> We can now integrate the ToF sensors with our IMU sensor along with our BLE communication 
+                            to get a full set of data from our robot. We can then send this data to our computer for processing. We add 
+                            a new command we can send to the robot 'COLLECT_SENSORS', which will return roll, pitch, yaw, distance from the front ToF and distance from the right ToF.
+                        </p>
+                        <img src="assets/img/lab3/snippet.png" width="600" class="center-image">
+                        <br>
+                        <p> 
+                            The above snippet shows the data collection loop. We make sure to only poll the ToF when both sensors are ready 
+                            in order to not block the IMU which can poll much faster. This gives us a ToF graph that only has data available 
+                            at certain time stamps:
+                        </p>
+                        <img src="assets/img/lab3/tof data over time.png" width="600" class="center-image">
+
+                        <p> 
+                            We collected roll and pitch data at the same time as the ToF. We notice that this data is continuous 
+                            as it does not block on the ToF sensors.
+                        </p>
+                        <img src="assets/img/lab3/imu data over time.png" width="600" class="center-image">
+                </div>
+            </div>
+        </div>
+
+        </section>
 
     </div>
     <!-- Bootstrap core JS-->
