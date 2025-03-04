@@ -35,6 +35,7 @@
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 1">Lab 1</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 2">Lab 2</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 3">Lab 3</a></li>
+                <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 4">Lab 4</a></li>
 
             </ul>
         </div>
@@ -841,23 +842,32 @@
                             Another experiment we can perform
                             is to see the impact of ranging time. We can change the ranging time with the function
                             setTimingBudget.
-                            To test this, we take 100 samples of an object at 10cm with various ranging times and measure the standard
-                            deviation of the samples. As expected, we notice that higher values of the randing time lead to more
-                            accurate results as the measured values approach the actual distance. In addition, our standard deviation
+                            To test this, we take 100 samples of an object at 10cm with various ranging times and
+                            measure the standard
+                            deviation of the samples. As expected, we notice that higher values of the randing time lead
+                            to more
+                            accurate results as the measured values approach the actual distance. In addition, our
+                            standard deviation
                             decreases as the ranging time increases.
                         </p>
 
                         <img src="assets/img/lab3/Figure_1.png" width="600" class="center-image">
 
-                        <p>We can now hook up our second ToF sensor. As stated above, we must shut off one ToF temporarily to 
+                        <p>We can now hook up our second ToF sensor. As stated above, we must shut off one ToF
+                            temporarily to
                             reprogram the other address which we achieve with the code below: </p>
                         <img src="assets/img/lab3/reprog.png" width="600" class="center-image">
 
-                        <p>Once the devices have unique addresses, we can read data from them independently as shown in the 
-                            video. We can print the values from each ToF in the same iteration of our main loop without having to 
-                        switch them on and off, as they have unique addresses. </p>
+                        <p>Once the devices have unique addresses, we can read data from them independently as shown in
+                            the
+                            video. We can print the values from each ToF in the same iteration of our main loop without
+                            having to
+                            switch them on and off, as they have unique addresses. </p>
 
-                            <iframe width="560" height="315" src="https://www.youtube.com/embed/GjD6XLQbMvY?si=6sCYKWUeo9bADJNf" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        <iframe width="560" height="315"
+                            src="https://www.youtube.com/embed/GjD6XLQbMvY?si=6sCYKWUeo9bADJNf" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
 
                         <p> Our next test consists of trialing the maximum speed we can run our code at with the ToF.
                             We do this by only polling the ToF when both sensors are ready, else we simply
@@ -914,6 +924,306 @@
             </div>
 
         </section>
+
+
+        <hr class="m-0" />
+
+
+        <section class="resume-section" id="Lab 4">
+            <div class="resume-section-content">
+                <h2 class="mb-0">Lab 4</h2>
+                <p>The purpose of this lab is to be able to drive our robot with open loop control. We connect our
+                    Artemis board to the motor drivers and test the motors with a series of simple commands.
+                </p>
+                <div class="d-flex flex-column flex-md-row justify-content-between">
+                    <div class="flex-grow-1">
+                        <h3 class="mb-0">Prelab</h3>
+                        <p>
+                            In order to drive our motors with enough current, we need to parallel couple the inputs and
+                            outputs of our motor drivers.
+                            This is so we can provide twice the current through one motor driver which prevents
+                            overheating and allows us to drive more current.
+                            We make sure that we are parallel coupling the inputs and outputs from the same motor driver
+                            to avoid timing issues.
+                        </p>
+                        <img src="assets/img/lab4/diag.png" width="600" class="center-image">
+                        <br>
+                        <p> The above diagram shows the wiring of our motor drivers. Both motor drivers are powered from
+                            a 3.7 V battery separate to the
+                            battery powering the Artemis. This allows us to avoid the current draw from the motors
+                            affecting the Artemis, as this may cause
+                            voltage dips which could shut off the Artemis during runtime. We make sure to choose analog
+                            capable pins to drive PWM
+                            signals to the motor drivers. The pins chosen (3, 5, 14, 15) are chosen to be close to the
+                            motor drivers when mounted. We try to
+                            keep the wiring as short as possible to avoid noise and interference, however I made sure
+                            the wires to the motors
+                            were long for easy access.
+                        </p>
+
+                        <h3 class="mb-0">Basic Wiring and PWM</h3>
+                        <p>
+                            We begin by wiring up our motor drivers to our Artemis board and hooking everything up
+                            through an external power supply.
+                            We then prove the motor drivers to make sure they can regulate the input voltage with the
+                            PWM from the Artemis. To test this,
+                            I took inspiration for Nila Narayan (2024) and iterated through the range of PWM values. I
+                            repeated this for both motor drivers,
+                            the following video shows the oscilloscope trace of the PWM signal. We choose a power supply
+                            voltage of 3.7V as this is the same
+                            value as our 850 mAh battery.
+                        </p>
+                        <iframe width="560" height="315"
+                            src="https://www.youtube.com/embed/373RD_iJki4?si=Q2GsptJquAnPU64B" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                        <p>
+                            With this, we can now drive the motors with the PWM signal. Initially, I tried to drive the
+                            motors from the power supply.
+                            I noticed that the motors would stutter significantly despite the current limit being much
+                            higher than needed. I then
+                            switched to using the battery and the motors were able to be driven. To drive the motor in
+                            both directions, I utilized the following block
+                            of code. I drove the motors in one direction by writing to one channel before switching to
+                            the other.
+                        </p>
+                        <pre>
+                        <code>
+                            void setup() {
+                                pinMode(r1, OUTPUT);
+                                pinMode(l1, OUTPUT);
+                              
+                                pinMode(r2, OUTPUT);
+                                pinMode(l2, OUTPUT);
+                                drive(0,50,3000);
+                                back(0, 50, 3000);
+                              }
+                              
+                              void drive(int r_pwm, int l_pwm, int time)
+                              {
+                                analogWrite(l1, l_pwm);
+                                analogWrite(l2, 0);
+                                analogWrite(r1, r_pwm);
+                                analogWrite(r2, 0);
+                                delay(time);
+                                //Kill motors
+                                analogWrite(r1, 0);
+                                analogWrite(r2, 0);
+                                analogWrite(l1, 0);
+                                analogWrite(l2, 0);
+                              }
+                              
+                              void back(int r_pwm, int l_pwm, int time)
+                              {
+                                analogWrite(l1, 0);
+                                analogWrite(l2, l_pwm);
+                                analogWrite(r1, 0);
+                                analogWrite(r2, r_pwm);
+                                delay(time);
+                                //Kill motors
+                                analogWrite(r1, 0);
+                                analogWrite(r2, 0);
+                                analogWrite(l1, 0);
+                                analogWrite(l2, 0);
+                              }
+                        </code>
+                        </pre>
+                        <p>
+                            We drive the motors in different directions by writing to the appropriate channels. We can
+                            see the result in the below
+                            video:
+                        </p>
+                        <iframe width="560" height="315"
+                            src="https://www.youtube.com/embed/qICvxcUdrEI?si=wzqaOEtM0IpXMGWi" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+
+                        <p>
+                            Now that we can drive the motors in both directions, we need to confirm that both motors
+                            function from battery power.
+                            We drive both of the motor controllers independently to make sure we have full
+                            functionality. The below videos
+                            display each side of the robot being driven.
+                        </p>
+                        <iframe width="560" height="315"
+                            src="https://www.youtube.com/embed/1NSmczgYmSk?si=PdKLyiKloPhKrxpP" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                        <iframe width="560" height="315"
+                            src="https://www.youtube.com/embed/SPqVT48ZpXg?si=GbVoOLMX8RIzL46Y" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                        <h3 class="mb-0">Car Assembly</h3>
+                        <p>
+                            We can now assemble our car. I wanted to make the multi-qwiic connector as central as
+                            possible as all of the
+                            sensors and Artemis need to be attached to it. I placed it in the center of the car and
+                            assembled the car around it.
+                            I kept the 850mAh battery in the battery compartment but left the 650mAh battery accessible
+                            in case I need to take
+                            out the Artemis. The motor drivers are placed on the sides of the respective motors and I
+                            made sure to keep the ToF
+                            sensors as clear as possible to avoid them detecting wires. The Artemis is placed on the
+                            back for each USB access.
+
+                        </p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <img src="assets/img/lab4/car.jpg" class="img-fluid" alt="Car Image 1" , width="600">
+                            </div>
+                            <div class="col-md-6">
+                                <img src="assets/img/lab4/cah 2.png" class="img-fluid" alt="Car Image 2" , width="600">
+                            </div>
+                        </div>
+
+                        <h3 class="mb-0">Running the Car</h3>
+                        <p>
+                            We can now run the car. We start by running the car with both motors at the same speed. We
+                            notice that when trying to
+                            drive the car in a straight line, the car will drift to the right. This can be due to a
+                            number of factors such as the weight distribution of the car,
+                            or mechanical friction differences of each side.
+                        </p>
+                        <iframe width="560" height="315"
+                            src="https://www.youtube.com/embed/uldN9R1NmFc?si=qyilOBnSwdSuLRcw" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+
+                        <p>
+                            To counter this, we add a calibration constant to our motors. This will scale the speed of
+                            each side to counteract the drift displayed in the
+                            code below.
+                        </p>
+                        <pre>
+                            <code>
+                                analogWrite(l1, 50 * drive_diff);
+                                analogWrite(l2, 0);
+                                analogWrite(r1, 50 * (1 / drive_diff));
+                                analogWrite(r2, 0);
+                            </code>
+                            </pre>
+
+                        <p>
+                            In our testing, the best value for this constant is around 1.07. We can see the result of
+                            this in the below video. We place a strip of cloth on the ground and see that the car is
+                            able to drive
+                            straight. While this value was found with trial and error, it would likely be better to
+                            determine the value of the constant with a more systematic approach such as measuring the
+                            distance traveled by each side of the car.
+                        </p>
+                        <iframe width="560" height="315"
+                            src="https://www.youtube.com/embed/ZW-wgc5TBXM?si=rPfPR5xDhHHgsS0B" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                        <h3 class="mb-0">PWM Limitations</h3>
+
+                        <p>
+                            Another thing we test for is the lower PWM limit. We test for 2 lower limits for PWM, the
+                            first being the minimum PWM value that will overcome static friction. To determine this
+                            value, we simply ramped up
+                            the PWM until the car started moving. In my testing, I found that a PWM value of around 45
+                            was the minimum value that would overcome static friction. Note that my testing was done on
+                            carpet
+                            and I had already been running the car for a while, so the battery was likely at a lower
+                            voltage. The actual value may be lower.
+
+                        </p>
+                        <p>
+                            The second lower limit is the PWM value to continue moving after coasting. I determined this
+                            in a similar manner to the first, however I would give the robot a push. Doing so, I found a
+                            PWM value of around 30 was
+                            enough to continue moving after coasting.
+                        </p>
+                        <h3 class="mb-0">Untethered Control</h3>
+                        <p>
+                            We can now control the car untethered. We implement 5 new commands through BLE:
+                            'DRIVE_FORWARD', 'TURN_R', 'TURN_L',
+                            'FAST_R', 'FAST_L'.
+                        </p>
+                        <pre>
+                            <code>
+                            
+      case DRIVE_FORWARD:
+      {
+          analogWrite(l1, 50 * drive_diff);
+          analogWrite(l2, 0);
+          analogWrite(r1, 50 * (1 / drive_diff));
+          analogWrite(r2, 0);
+
+          delay(time_run);
+          //Kill motors
+          analogWrite(r1, 0);
+          analogWrite(r2, 0);
+          analogWrite(l1, 0);
+          analogWrite(l2, 0);
+          break;
+      }
+
+      case TURN_R:
+      {
+          analogWrite(l1, 240);
+          analogWrite(l2, 0);
+          analogWrite(r1, 0);
+          analogWrite(r2, 240);
+
+          delay(1200);
+          //Kill motors
+          analogWrite(r1, 0);
+          analogWrite(r2, 0);
+          analogWrite(l1, 0);
+          analogWrite(l2, 0);
+          break;
+      }
+
+      ....
+
+      case FAST_L:
+      {
+          analogWrite(l1, 0);
+          analogWrite(l2, 0);
+          analogWrite(r1, 0);
+          analogWrite(r2, 240);
+
+          delay(1200);
+          //Kill motors
+          analogWrite(r1, 0);
+          analogWrite(r2, 0);
+          analogWrite(l1, 0);
+          analogWrite(l2, 0);
+          break;
+      }
+
+                            </code>
+                            </pre>
+                        <p>
+                            The first command will drive the car forward at a given speed for a given time. The second
+                            and third commands turn
+                            the car for a set period of time in the respective direction. The last two commands are for
+                            fast turns while going
+                            forward. The below video demonstrates control of the car through BLE. This was near the end
+                            of my testing
+                            so the battery was likely at a lower voltage causing small stutters in the movement.
+                        </p>
+                        <iframe width="560" height="315"
+                            src="https://www.youtube.com/embed/JmIPicdo-mo?si=j7mjlW8pTFb_t-dY" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                        <h3 class="mb-0">Discussion</h3>
+                        <p>
+                            Overall, this lab was heavily focused on hardware and wiring. The main challenge I faced was an issue with one of my motor drivers, which 
+                            is shorted when being powered. I determined this as when plugging in the 850mAh battery, the motor driver would cause the motor to spin. 
+                            Initially I thought the Vin and output pins were shorted however after proping with a multimeter, I detected no short. Interestingly, when 
+                            I drove the motor driver with a PWM signal, the PWM signal would dominate the Vin signal and the motor would follow the PWM value. This allowed 
+                            me to continue testing despite the issue.
+                        </p>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
 
     </div>
     <!-- Bootstrap core JS-->
