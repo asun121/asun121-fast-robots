@@ -36,6 +36,7 @@
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 2">Lab 2</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 3">Lab 3</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 4">Lab 4</a></li>
+                <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 5">Lab 5</a></li>
 
             </ul>
         </div>
@@ -1210,10 +1211,14 @@
                             allowfullscreen></iframe>
                         <h3 class="mb-0">Discussion</h3>
                         <p>
-                            Overall, this lab was heavily focused on hardware and wiring. The main challenge I faced was an issue with one of my motor drivers, which 
-                            was shorted when being powered. I determined this as when plugging in the 850mAh battery, the motor driver would cause the motor to spin. 
-                            Initially I thought the Vin and output pins were shorted however after probing with a multimeter, I detected no short. Interestingly, when 
-                            I drove the motor driver with a PWM signal, the PWM signal would dominate the Vin signal and the motor would follow the PWM value. This allowed 
+                            Overall, this lab was heavily focused on hardware and wiring. The main challenge I faced was
+                            an issue with one of my motor drivers, which
+                            was shorted when being powered. I determined this as when plugging in the 850mAh battery,
+                            the motor driver would cause the motor to spin.
+                            Initially I thought the Vin and output pins were shorted however after probing with a
+                            multimeter, I detected no short. Interestingly, when
+                            I drove the motor driver with a PWM signal, the PWM signal would dominate the Vin signal and
+                            the motor would follow the PWM value. This allowed
                             me to continue testing despite the issue.
                         </p>
 
@@ -1221,6 +1226,294 @@
                 </div>
 
             </div>
+
+        </section>
+
+
+        <hr class="m-0" />
+
+
+        <section class="resume-section" id="Lab 5">
+            <div class="resume-section-content">
+                <h2 class="mb-0">Lab 5</h2>
+                <p>The purpose of this lab is to be able to drive our robot with basic closed loop control. We implement
+                    a linear
+                    PID controller to drive the robot in a straight line. This is done by checking the ToF sensors and
+                    attempting to drive the robot into a wall and stop just before hitting the wall.
+                </p>
+                <div class="d-flex flex-column flex-md-row justify-content-between">
+                    <div class="flex-grow-1">
+                        <h3 class="mb-0">Prelab</h3>
+                        <p>
+                            We first implement a PID controller command that can be run over BLE. We do this by looping
+                            for a set period of time
+                            and computing the proper PWM value with a function PID, which takes in our current distance
+                            to the wall and a desired setpoint.
+                            The PID function is a simple linear PID controller that computes the error between the
+                            current distance and the setpoint. We then
+                            store the current distance, PID value and timestamp in arrays to later be sent over BLE.
+                            This is done after we stop driving the motors
+                            in order to avoid delays in the loop.
+                        </p>
+                        <pre>
+                        <code>
+                                while (millis() - start_time < time_run) {
+                          
+                                    if (distanceSensor.checkForDataReady()) {
+                                      distance = distanceSensor.getDistance();  //Get the result of the measurement from the sensor
+                                      distanceSensor.clearInterrupt();
+                                      distanceSensor.stopRanging();
+                                      distanceSensor.startRanging();  //Write configuration bytes to initiate measurement
+
+                                    }
+                                    curr_pwm = PID(distance, 300);
+                                    if (i < max_arr) {
+                                      tof_ranges[i] = distance;
+                                      pid_values[i] = curr_pwm;
+                                      timestamps[i] = millis();
+                                    }
+                                    i++;
+                                  }
+                            </code>
+                            </pre>
+
+                        <p>
+                            We implement another command in order to easily tune the PID controller over BLE. This
+                            command takes in 3 values, the P, I and D values sent from our computer.
+                            We then set the PID controller to these values allowing us to tune much faster
+                        </p>
+                        <pre>
+                        <code>
+                                float f_a, f_b, f_c;
+                                // Extract the next value from the command string as an integer
+                                success = robot_cmd.get_next_value(f_a);
+                                if (!success)
+                                  return;
+                        
+                                // Extract the next value from the command string as an integer
+                                success = robot_cmd.get_next_value(f_b);
+                                if (!success)
+                                  return;
+                        
+                                success = robot_cmd.get_next_value(f_c);
+                                if (!success)
+                                  return;
+                                kP = f_a;
+                                kI = f_b;
+                                kD = f_c;
+                            </code>
+                            </pre>
+                        <p>
+                            On the python side, we utilize the notification handler from before to receive the data from
+                            the robot. To send the new commands, we
+                            simply have to extend our command list to inclde the new enum values and send the commands
+                            in the same manner as before.
+                        </p>
+
+                        <h3 class="mb-0">P Control</h3>
+                        <p>
+                            We first test the P control of the robot. We set the I and D values to 0 and only tune the P
+                            value. We set the setpoint to 300mm(1ft) and
+                            drive the robot forward. We can see the result of this in the below video. Initially, I set
+                            the P gain too high at 0.13 as this would net 255 PWM at 2m. The robot overshot
+                            significantly
+                            before stalling. I lowered my initial P gain to be around 0.09 and I would begin the robot
+                            around 2000mm from the wall, which would
+                            net a PWM of 180.
+                        </p>
+                        <iframe width="650" height="400" src="https://www.youtube.com/embed/e5yNh0MICpY" frameborder="0"
+                            allowfullscreen></iframe>
+                        <p>
+                            With just P, we overshoot our setpoint by around 100mm as seen in the below graph. This is
+                            expected as we are not outputting enough PWM once we are close to the setpoint.
+                        </p>
+                        <img src="assets/img/lab 5/just p.png" width="900" class="center-image">
+
+                        <h3 class="mb-0">PI Control</h3>
+
+                        <p>
+                            To mitigate this, we add an I term to our PID controller. This will help us compensate for
+                            steady state error. In addition to the I term, we
+                            also normalize our PWM to be within the range 40 - 255. This sets our lower bound to be the
+                            minimum PWM value that will overcome static friction found
+                            in lab 4. For our I term, the rate variable corresponds to the time between each iteration
+                            of the loop which I measured to be 1.3ms. At 2m, an I of .001 would
+                            integrate at around 2 PWM per iteration which I deemed to be a good starting point. With the
+                            integral and a normalized
+                            PWM, we get a more aggressive response from the robot.
+                        </p>
+                        <pre>
+                        <code>
+                            
+                            int PID(float curr, float setpoint) {
+                                err = curr - setpoint;
+                                integral += err * rate;  // Accumulate the integral term
+                            
+                                // Compute PID Output
+                                pwm = kP * abs(err) + kI * integral;
+                            
+                                // Normalize PWM output
+                                int normalized_pwm = map(pwm, 0, 255, 35, 255);
+                                if (normalized_pwm > 200) normalized_pwm = 200;
+                            
+                                // Drive motors based on error sign
+                                if (err < 0) {
+                                drive(normalized_pwm, normalized_pwm);
+                                } else {
+                                back(normalized_pwm, normalized_pwm);
+                                }
+                            
+                                return normalized_pwm;
+                            }
+  
+                        </code>
+                        </pre>
+                        <iframe width="650" height="400" src="https://www.youtube.com/embed/fDzU2oZYELM" frameborder="0"
+                            allowfullscreen></iframe>
+                        <p>
+                            After some tuning, With the I term and normalized PWM values, we stop nearly instantly at
+                            the setpoint. This was with a P gain of 0.07 and integral of 0.0005.
+                            We can see the result of this in the below graph. We notice that we are able to stop within
+                            10mm of the setpoint.
+                        </p>
+                        <img src="assets/img/lab 5/with integral chart.png" width="900" class="center-image">
+                        <h3 class="mb-0">Interpolation</h3>
+                        <p>
+                            Due to the slow speed of the ToF measures, we see our PID loop is only able to compute a new
+                            value when the ToF samples depite the
+                            two operations being decoupled. To mitigate this, we can linearly interpolate between the
+                            last two ToF samples to get an estimate
+                            distance despite not having a measure. We utilize the following code, which calculates thes
+                            slope between the last two samples and if
+                            there is not new data, we estimate the distance based on the slope.
+                        </p>
+                        <pre>
+                        <code>
+                            
+                            while (millis() - start_time < time_run) {
+                                new_data = false;
+                                if (distanceSensor.checkForDataReady()) {
+                                  new_data = true;
+                                  distance = distanceSensor.getDistance();  // Get the result of the measurement from the sensor
+                                  distanceSensor.clearInterrupt();
+                                  distanceSensor.stopRanging();
+                                  slope = (float)(distance - last_dist) / (float)(millis() - prev_measure_time);
+                                  last_dist = distance;
+                                  prev_measure_time = millis();
+                                  distanceSensor.startRanging();  // Write configuration bytes to initiate measurement
+
+                                }
+                      
+                                if(!new_data)
+                                {
+                                  distance = distance + slope * dt;
+                                }
+                               // Serial.println(distance);
+                      
+                                curr_pwm = PID(distance, 300);
+                                // dt = millis() - prev_time;
+                                // prev_time = millis();
+                      
+                                if (i < max_arr) {
+                                  tof_ranges[i] = distance;
+                                  pid_values[i] = curr_pwm;
+                                  timestamps[i] = millis();
+                                }
+                      
+                                dt = millis() - prev_time;
+                                prev_time = millis();
+                                i++;
+                              }
+                        </code>
+                        </pre>
+
+                        <iframe width="650" height="400" src="https://youtube.com/embed/2d-VoGjSsyE" frameborder="0"
+                            allowfullscreen></iframe>
+
+                        <p>
+                            When running with just P control value of 0.09, we see that the system is much more
+                            responsive than before and the graph is much smoother. The smoother
+                            graph causes the robot to change the PWM more frequently leading to a more responsive
+                            system. This was surprising to me as I was slightly more
+                            responsiveness however not significantly. I believe this trial was affected by me charging
+                            the battery beforehand.
+                        </p>
+                        <img src="assets/img/lab 5/linear extrap.png" width="900" class="center-image">
+
+                        <h3 class="mb-0">PID Control</h3>
+                        <p>
+                            Naturally, we now want to increase the speed of the robot. To do this, I added a D term to
+                            have more control over the loop.
+                            When implementing the D term, I made sure to add a LPF to the derivative term in order to
+                            prevent noise.
+                        </p>
+                        <pre>
+                        <code>
+                            
+                            int PID(float curr, float setpoint) {
+                                err = curr - setpoint;
+                                integral += err * rate;  // Accumulate the integral term
+                            
+                                // **Derivative Term with Low-Pass Filter**
+                                float raw_derivative = (err - prev_err) / rate;
+                                derivative = d_filter_alpha * raw_derivative + (1 - d_filter_alpha) * prev_derivative;  // LPF applied
+                            
+                                // Compute PID Output
+                                pwm = kP * abs(err) + kI * integral + kD * derivative;
+                            
+                                // Normalize PWM output
+                                int normalized_pwm = map(pwm, 0, 255, 35, 255);
+                                if (normalized_pwm > 200) normalized_pwm = 200;
+                            
+                                // Drive motors based on error sign
+                                if (err < 0) {
+                                drive(normalized_pwm, normalized_pwm);
+                                } else {
+                                back(normalized_pwm, normalized_pwm);
+                                }
+                            
+                                // Store previous values for next iteration
+                                prev_err = err;
+                                prev_derivative = derivative;
+                            
+                                return normalized_pwm;
+                            }
+                        </code>
+                        </pre>
+
+                        <p>
+                            Despite having PID control, I found my best results were with just P and I control. I
+                            attempted to use a heuristic procedure to tune the system
+                            by increasing kp until oscillation then decreasing by a factor of 2-4, repeating with ki and
+                            then using kd to respond to disturbances. I found I had best
+                            results when removing the kd term. I believe I need to do further work on implementing kd
+                            such as tuning the LPF alpha value. I noticed some stuttering with kd
+                            which I believe to be due to noise. While not particularly fast, my smoothest results occured with kp = 0.04 and ki = 0.0005
+                            as shown in the video below (while suffering from a bit of overshoot, the
+                            system was able to recover fast. I would likely be able to improve by handling integrator
+                            windup):
+                        </p>
+                        <iframe width="650" height="400" src="https://www.youtube.com/embed/1hTbqQ1moM0" frameborder="0"
+                            allowfullscreen></iframe>
+                        <h3 class="mb-0">Speed and Sample Rate</h3>
+                        <p>
+                            With all of the PID functions implemented, we now can determine our sample rate. By
+                            measuring the amount of timestamps over a period of 6 seconds,
+                            we can determine the sample rate of our PID loop.
+                        </p>
+                        <img src="assets/img/lab 5/sample rate.png" width="900" class="center-image">
+                        <p>
+                            We can see that our PID loop is running at around 335 Hz. This gives us a new PID
+                            calculation every 3ms. Since the ToF is decoupled, we also
+                            measure its sample time as well. By counting the amount of times we get a new ToF sample
+                            over 6 seconds, we find the ToF to sample once
+                            every 200ms. The default sample rate of the ToF is around this value as it takes 100ms to
+                            sample and has 100ms between measurements. While this could
+                            be sped up by changing the ranging time and time between measurements, I left these values
+                            at default as I was able to get stable values when interpolating between samples.
+                        </p>
+
+                    </div>
 
         </section>
 
