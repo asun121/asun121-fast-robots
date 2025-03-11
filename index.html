@@ -1508,10 +1508,11 @@
                             calculation every 3ms. Since the ToF is decoupled, we also
                             measure its sample time as well. By counting the amount of times we get a new ToF sample
                             over 6 seconds, we find the ToF to sample once
-                            every 200ms. The default sample rate of the ToF is around this value as it takes 100ms to
+                            every 100ms. The default sample rate of the ToF is around this value as it takes 100ms to
                             sample and has 100ms between measurements. While this could
                             be sped up by changing the ranging time and time between measurements, I left these values
-                            at default as I was able to get stable values when interpolating between samples.
+                            at default as I was able to get stable values when interpolating between samples. In terms of car speed,
+                            we measure our max speed to be around 0.88m/s from the graph.
                         </p>
 
                     </div>
