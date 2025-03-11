@@ -982,11 +982,12 @@
                             With this, we can now drive the motors with the PWM signal. Initially, I tried to drive the
                             motors from the power supply.
                             I noticed that the motors would stutter significantly despite the current limit being much
-                            higher than needed. I then
+                            higher than needed. I believe this is because the power supply limited the current from rapidly 
+                            switching when using PWM. I then
                             switched to using the battery and the motors were able to be driven. To drive the motor in
                             both directions, I utilized the following block
                             of code. I drove the motors in one direction by writing to one channel before switching to
-                            the other.
+                            the other direction.
                         </p>
                         <pre>
                         <code>
