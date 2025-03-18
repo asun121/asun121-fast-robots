@@ -37,6 +37,7 @@
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 3">Lab 3</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 4">Lab 4</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 5">Lab 5</a></li>
+                <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 6">Lab 6</a></li>
 
             </ul>
         </div>
@@ -982,7 +983,8 @@
                             With this, we can now drive the motors with the PWM signal. Initially, I tried to drive the
                             motors from the power supply.
                             I noticed that the motors would stutter significantly despite the current limit being much
-                            higher than needed. I believe this is because the power supply limited the current from rapidly 
+                            higher than needed. I believe this is because the power supply limited the current from
+                            rapidly
                             switching when using PWM. I then
                             switched to using the battery and the motors were able to be driven. To drive the motor in
                             both directions, I utilized the following block
@@ -1489,7 +1491,8 @@
                             then using kd to respond to disturbances. I found I had best
                             results when removing the kd term. I believe I need to do further work on implementing kd
                             such as tuning the LPF alpha value. I noticed some stuttering with kd
-                            which I believe to be due to noise. While not particularly fast, my smoothest results occured with kp = 0.04 and ki = 0.0005
+                            which I believe to be due to noise. While not particularly fast, my smoothest results
+                            occured with kp = 0.04 and ki = 0.0005
                             as shown in the video below (while suffering from a bit of overshoot, the
                             system was able to recover fast. I would likely be able to improve by handling integrator
                             windup):
@@ -1511,9 +1514,282 @@
                             every 100ms. The default sample rate of the ToF is around this value as it takes 100ms to
                             sample and has 100ms between measurements. While this could
                             be sped up by changing the ranging time and time between measurements, I left these values
-                            at default as I was able to get stable values when interpolating between samples. In terms of car speed,
+                            at default as I was able to get stable values when interpolating between samples. In terms
+                            of car speed,
                             we measure our max speed to be around 0.88m/s from the graph.
                         </p>
+
+                    </div>
+
+        </section>
+
+        <hr class="m-0" />
+
+
+        <section class="resume-section" id="Lab 6">
+            <div class="resume-section-content">
+                <h2 class="mb-0">Lab 6</h2>
+                <p>The previous lab allowed us to control the robot in a straight line using PID control. This lab will
+                    allow us to control
+                    the orientation of the robot using PID control. To do this, we utilize the IMU onboard our robot to
+                    estimate our yaw.
+                </p>
+                <div class="d-flex flex-column flex-md-row justify-content-between">
+                    <div class="flex-grow-1">
+                        <h3 class="mb-0">Prelab</h3>
+                        <p>
+                            We change our bluetooth setup in this lab to be able to process bluetooth commands on the
+                            fly. This means we want to be able to change the setpoint
+                            while the controller is running as well as the PID gains on the fly. To do this, I changed
+                            the design of my code where instead of running
+                            the PID loop when triggered by a command, I run the PID loop in the main loop. I then
+                            utilize various commands to change global variables such as
+                            setpoint and PID values as well as start and stop recording data. We maintain the below main
+                            loop which has various flags such as 'recording', which
+                            begins collecting data. In the future, I can add more flags that can be set by commands to
+                            change the behavior of the robot.
+                        </p>
+                        <pre>
+                        <code>
+                        
+                            while (central.connected()) {
+                                poll_dmt();
+                          
+                                curr_pwm = PID_Turn(yaw, setpoint);
+                                if(recording && i < max_arr)
+                                {
+                                  timestamps[i] = millis();
+                                  pid_values[i] = curr_pwm;
+                                  yaw_arr[i] = yaw;
+                                  i++;
+                                }
+                                else if(i >= max_arr)
+                                {
+                                  i = 0;
+                                  recording = false;
+                                }
+                          
+                                // Send data
+                                write_data();
+                          
+                                // Read data
+                                read_data();
+                              }
+                        </code>
+                        </pre>
+                        <p>
+                            We implemented the following set of commands for this lab: START_RECORD, CHANGE_SETPOINT,
+                            SEND_BACK, TUNE_PID.
+                            START_RECORD will begin recording data to be sent over BLE. CHANGE_SETPOINT will change the
+                            setpoint of the PID controller. SEND_BACK will send back the data recorded by the robot.
+                            TUNE_PID will change the PID values of the controller.
+                        </p>
+                        <p>
+                            On the python end, we are able to send commands on the fly as shown below. This is much
+                            faster to tune the PID controller as I can rapidly see the changes on the robot.
+                            we utilize the notification handler from before to receive the data from
+                            the robot. We are able to
+                            parse the values sent from the robot into 3 arrays which we can then use to plot using
+                            matplotlib. This allowed me to tune
+                            the PID controller graphically and see the results of my tuning.
+                        </p>
+
+                        <img src="assets/img/lab6/cmds.png" alt="P Control Graph" width="600" class="center-image">
+                        <p>
+                            The workflow this lab was as follows: Start recording, set my PID values, set my setpoint, then send back my recording
+                        </p>
+
+                        <h3 class="mb-0">Getting Yaw</h3>
+                        <p>
+                            Initially I simply integrated my gyroscope values in order to estimate the yaw of the robot.
+                            A consequence of this was
+                            I noticed significant drift from my IMU. While I tried offsetting this with a constant
+                            linear offset, I would still notice drift
+                            over time and if I turned the robot significantly with PID control, this would only get
+                            worse. Instead, I chose to utilize DMP to obtain yaw values of my robot.
+                        </p>
+                        <p>
+
+                            Thank you to Stephan Wagner (2024) for providing a useful guide to setting up DMP. DMP fuses
+                            all of the sensors onboard the IMU in order to return accurate estimates of the yaw that
+                            suffers from little drift.
+                            Looking at the datasheet, we find that DMP runs at 1.1khz. We can further specify the output
+                            data rate with myICM.setDMPODRrate, where we set the ODR to the maximum of
+                            1.1khz (same as DMP rate). Looking at our gyroscope, it has a programmable range between 250
+                            to 2000 degrees per second. This can be changed by editing the GYRO_CONFIG register
+                            however DMP sets the gyro to max by default which is more than enough sensitivity for our
+                            use case. Something we need to watch out for with DMT is avoiding filling up the FIFO, which
+                            will cause
+                            crashes. To do this, we constantly poll the DMT in our main loop.
+                        </p>
+                        <pre>
+                        <code>
+                            enable_dmt();
+                            // While central is connected
+                            while (central.connected()) {
+                              poll_dmt();                        
+                              // Send data
+                              write_data();
+                              // Read data
+                              read_data();
+                            }
+
+                        </code>
+                        </pre>
+                        <h3 class="mb-0">P Control</h3>
+                        <p>
+                            We are able to obtain fairly good results with just a P term. The below video shows a
+                            controller with only a P term of 3.4. For this part, I returned to the old code structure which 
+                            only runs the PID loop when triggered by a command. This is because I wanted to be able to have a more 
+                            controlled testing environment where I could set up the robot consistently each time and tune:
+                        </p>
+                        <iframe width="560" height="315"
+                            src="https://www.youtube.com/embed/CahVN-BPCSA?si=qImwISqHwC4LBjF0" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+
+                        <p>As we can see in the video, the controller initially is able to quickly turn to the setpoint
+                            however only a P controller
+                            struggles near the setpoint and has a lot of steady state error. The below graph shows a
+                            setpoint of 30 degrees:
+                        </p>
+                        <img src="assets/img/lab6/yaw pid just p 3.4.png" alt="P Control Graph" width="900"
+                            class="center-image">
+
+                        <p>
+                            A fun thing we can do with just P control is to continuously run our P controller and push
+                            the robot around.
+                            We can see that the robot is able to maintain its orientation despite being pushed around.
+                        </p>
+                        <iframe width="560" height="315" src="https://www.youtube.com/embed/YODfBr7bWSY" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+
+                        <h3 class="mb-0">PID Control</h3>
+
+
+                        <p>For this lab I implemented full PID control. Initially I planned on using PI however after
+                            seeing how quickly the robot turned with
+                            sole P control, I decided it would be best to add a derivative term to dampen out
+                            significant changes in slope. I made sure to include a LPF after looking at the raw DMT
+                            graph. While
+                            the graph looks smooth from afar, I wanted to avoid the derivative term jumping from the
+                            small bumps in the curve.
+                            I chose a fairly high alpha of 0.7 as there were not significant bumps in the graph.
+                        </p>
+                        <img src="assets/img/lab6/yaw over time.png" alt="PID Control Graph" width="900"
+                            class="center-image">
+                        <pre>
+                            <code>
+                                // **Derivative Term with Low-Pass Filter**
+                                float raw_derivative = (err - prev_err) / rate;
+                                derivative = d_filter_alpha * raw_derivative + (1 - d_filter_alpha) * prev_derivative;  // LPF applied
+                                </code>
+                            </pre>
+
+                        <p>
+                            The below displays our PID controller. One thing we need to do is to handle wraparound of
+                            the error, where our yaw value can be
+                            between 0 and 360. We don't want to have a large error when the robot is facing the opposite
+                            direction. To do this, we use the fmod function to wrap the error
+                            around 360 degrees. We then subtract 180 to get the error between -180 and 180 degrees.
+                            Similar to lab 5, we
+                            normalize our pwm between 35 and 255 to avoid stalling the motors. To avoid derivative kick,
+                            I changed the derivative term to be
+                            derivative of the yaw (process variable) rather than error. This means that upon changing
+                            setpoints, we will not experience massive kick.
+                        </p>
+                        <pre>
+                            <code>
+
+                                int PID_Turn(float curr, float setpoint) {
+                                    // Compute angular error with wraparound handling
+                                    float err = fmodf(setpoint - curr + 540.0, 360.0) - 180.0;
+                                    integral += err * rate;  // Accumulate the integral term
+                                  
+                                    // **Derivative Term with Low-Pass Filter**
+                                    float raw_derivative = (yaw - prev_yaw) / rate;
+                                    derivative = d_filter_alpha * raw_derivative + (1 - d_filter_alpha) * prev_derivative;  // LPF applied
+                                  
+                                    // Compute PID Output
+                                    //pwm = kP * abs(err) + kI * integral + kD * derivative;
+                                  
+                                    pwm = kP * err + kI * integral + kD * derivative;
+                                  
+                                    // Normalize PWM output
+                                    int normalized_pwm;
+                                    if (pwm < 0) {
+                                      if (pwm < -255) {
+                                        pwm = -255;
+                                      }
+                                      normalized_pwm = map(pwm, -255, 0, -255, -35);
+                                    } else {
+                                      if (pwm > 255) {
+                                        pwm = 255;
+                                      }
+                                      normalized_pwm = map(pwm, 0, 255, 35, 255);
+                                    }
+                                    diff_drive(normalized_pwm, -normalized_pwm);
+                                    // Store previous values for next iteration
+                                    prev_yaw = yaw;
+                                    prev_derivative = derivative;
+                                  
+                                    return normalized_pwm;
+                                  }
+                            </code>
+                            </pre>
+                        <p>
+                            After tuning the PID values following the heuristic procedure, I found that I had best
+                            results with a P value of 2.8, I value of 0.014 and D value of 0.001. Giving
+                            us little steady state error as shown below (setpoint is 30 degrees):
+                        </p>
+                        <img src="assets/img/lab6/full pid control.png" alt="PID Control Graph" width="900"
+                            class="center-image">
+                            <iframe width="560" height="315" src="https://www.youtube.com/embed/ytg91QJ5MFE" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+                            <h3 class="mb-0">On the fly setpoint changes</h3>
+
+                        <p>
+                            The below video shows us changing the setpoint on the fly to make sure we don't suffer from
+                            derivative kick. While we don't see much kick from the graph,
+                            we unfortunately do not hit our setpoints accurately. This could be resolved with more
+                            tuning however this was late into my testing and my
+                            battery had lost charge. Looking at the graph, I believe I could have benefited from a
+                            higher
+                            derivative to reduce the amount of kick that the P term gives. In addition, I likely should
+                            have reduced my
+                            proportional term to reduce the amount of overshoot. I also believe that it may be
+                            beneficial to reset
+                            the integral term when changing setpoints to avoid integrator windup.
+                        </p>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <iframe width="100%" height="315"
+                                    src="https://www.youtube.com/embed/zXHNWuZeM7Q?si=SVdTVT7pz3bkbcSp" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen></iframe>
+                            </div>
+                            <div class="col-md-6">
+                                <img src="assets/img/lab6/3 setpoints trial 1.png" alt="PID Tuning Graph" height="650">
+                            </div>
+                        </div>
+
+                        <h3 class="mb-0">Discussion</h3>
+                        <p>
+                            This lab was a great exercise in implementing PID control for orientation. The use of DMP
+                            for yaw estimation significantly improved the accuracy and reduced drift compared to
+                            integrating raw gyroscope data. The ability to tune PID parameters on the fly and change
+                            setpoints dynamically made the process much more efficient and allowed for rapid testing and
+                            iteration.
+                        </p>
+                        <p>
+                            One challenge I faced was the surface I was testing on. Initially, I was testing on a carpet which 
+                            made it extremely difficult to get consistent values as the differential drive could not turn. I then switched to 
+                            glass which was easier to turn on however I believe I would have benefited from a more slippery surface which would allow 
+                            the robot to skid easier as it turned. 
+                        </p>
+
 
                     </div>
 
