@@ -2031,9 +2031,11 @@
                             <h3 class="mb-0">Discussion</h3>
                             <p>
                                 This lab was a great exercise in implementing the Kalman Filter. Unfortunately, I was unable 
-                                to remove much of the stepped behavior on the real robot. I believe that this is due to the measurement noise 
-                                being too low however I found it difficult to achieve desirable behavior when I tuned the noise values. For the stunts lab,
-                                I plan to return to using linear interpolation to speed up the data as I believe this will be simpler to implement.
+                                to remove much of the stepped behavior on the real robot. This is because I always return the last measured
+                                distance as my measured value. This is incorrect as the Kalman Filter is treating old data as new measurement data. I 
+                                did not have time to fix this however.
+                                For the stunts lab,
+                                I plan to return to using linear interpolation to speed up the data as I believe this will be a simpler setup.
                                 </p>
                         </div>
                 </div>
