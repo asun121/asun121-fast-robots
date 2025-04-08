@@ -2031,11 +2031,10 @@
                         </p>
                         <img src="assets/img/lab7/unnamed.png" class="img-fluid" alt="Kalman Filter Curve" width="500">
                         <p>
-                            In order to mitigate this, I changed the code to run the Kalman filter and the ToF reading
-                            at the same rate.
-                            This means that the ToF sensor and Kalman filter update at the same time. This netted the
+                            I realized that I made a mistake where I called the KF every iteration of the control loop. This meant that 
+                            the KF would be ran even if I did not have new ToF measurement. I then changed the code to only run the KF when I had a new ToF measurement. This netted the
                             below graph. This however
-                            was still stepped as my ToF sensor was still returning identical values however this was not
+                            was still stepped as my ToF sensor was still returning identical values on seperate iterations but this was not
                             an issue with the filter.
                         </p>
                         <img src="assets/img/lab7/best kf.png" class="img-fluid" alt="Kalman Filter Curve" width="500">
