@@ -39,6 +39,7 @@
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 5">Lab 5</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 6">Lab 6</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 7">Lab 7</a></li>
+                <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 8">Lab 8</a></li>
 
             </ul>
         </div>
@@ -2010,9 +2011,12 @@
                             </code>
                         </pre>
 
-                        <p>To run the filter in real time, we need to constantly feed in new ToF data. Because the ToF data only updates 
-                            every 54ms, we are often passing in the same measurements. This led to the filter looking following a bit more 
-                            of a stepped curve. We are able to run the following code every loop to computer new KF values for our PID control where 
+                        <p>To run the filter in real time, we need to constantly feed in new ToF data. Because the ToF
+                            data only updates
+                            every 54ms, we are often passing in the same measurements. This led to the filter looking
+                            following a bit more
+                            of a stepped curve. We are able to run the following code every loop to computer new KF
+                            values for our PID control where
                             kf_error is our computed distane and distance is our ToF value:
                         </p>
                         <pre>
@@ -2023,22 +2027,188 @@
                         </pre>
                         <p>
                             We still see that the filter is able to smooth out the data however it is still stepped.
-                        </p>     
-                        <img src="assets/img/lab7/unnamed.png" class="img-fluid" alt="Kalman Filter Curve"
-                            width="500">    
-                        
-                        
-                            <h3 class="mb-0">Discussion</h3>
-                            <p>
-                                This lab was a great exercise in implementing the Kalman Filter. Unfortunately, I was unable 
-                                to remove much of the stepped behavior on the real robot. This is because I always return the last measured
-                                distance as my measured value. This is incorrect as the Kalman Filter is treating old data as new measurement data. I 
-                                did not have time to fix this however.
-                                For the stunts lab,
-                                I plan to return to using linear interpolation to speed up the data as I believe this will be a simpler setup.
-                                </p>
-                        </div>
+                        </p>
+                        <img src="assets/img/lab7/unnamed.png" class="img-fluid" alt="Kalman Filter Curve" width="500">
+
+
+                        <h3 class="mb-0">Discussion</h3>
+                        <p>
+                            This lab was a great exercise in implementing the Kalman Filter. Unfortunately, I was unable
+                            to remove much of the stepped behavior on the real robot. This is because I always return
+                            the last measured
+                            distance as my measured value. This is incorrect as the Kalman Filter is treating old data
+                            as new measurement data. I
+                            did not have time to fix this however.
+                            For the stunts lab,
+                            I plan to return to using linear interpolation to speed up the data as I believe this will
+                            be a simpler setup.
+                        </p>
+                    </div>
                 </div>
+
+        </section>
+
+
+        <section class="resume-section" id="Lab 8">
+            <div class="resume-section-content">
+                <h2 class="mb-0">Lab 8</h2>
+                <p>
+                    This lab, we do stunts with the robot! The stunt I chose to perform was the flip, as I believed that
+                    this was better suited for my robot.
+                    I had put the ToF on the heavier side of the robot which would help with the flip.
+                </p>
+                <h3 class="mb-0">Implementing the flip in code</h3>
+                <p>
+                    In order to perform a flip, I needed to implement a new command in code. First I removed my PID
+                    controller
+                    as we do not want to drop speed into the flip. Initially, I utilized the
+                    braking functionality to try and flip.
+                    In code, I would drive forward until my distance to the wall brok a certain threshold. I then brake for a certain amount of time, then reverse for the 
+                    same amount of time it took to drive to the wall. With my intial code, I was unable to flip the robot as I believed I was not switching 
+                    directions fast enough. 
+                </p>
+                <pre>
+                <code>
+                case FLIP_DRIVE:
+                {
+                    start_time = millis();
+                    while(distance < DISTANCE_THRESHOLD){
+                        // Check and interpolate distance, drive forward
+                    }
+
+                    brake();
+                    delay(300);
+
+                    time_to_drive = millis() - start_time + 100; // Time it took to drive forward, it will be slightly longer back due to the flip
+                    start_time = millis();
+
+                    while(millis() - start_time < time_to_drive)
+                    {
+                        back(255,255);
+                    }
+                }
+                </code>
+                </pre>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/rLfk1ihajDI?si=TPZdyBoW221xzzJ8"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+
+                <p>
+                    To compensate, I changed a couple things in hardware and software. First, I moved the position of
+                    the Artemis battery. Initially, it was in the back of
+                    the robot however I moved it to be in the battery compartment. This shifted the weight distribution
+                    forward causing the robot to be more unstable.
+                </p>
+                <img src="assets/img/lab8/batteries.jpg" alt="Robot Flip" width="300" class="center-image">
+                <p>
+                    I also changed the code to use a different drive method. Instead of running the motors in the fast
+                    decay mode (coast), I switched to using the slow decay mode (brake). This allowed me to stop the
+                    motors much quicker and switch directions faster.
+                    In addition, the robot would not coast as much after I stopped the motors.
+                </p>
+                <img src="assets/img/lab8/decay.png" alt="Robot Flip" width="500" class="center-image">
+                <pre>
+                    <code>
+                                                // Slow decay mode
+                                                void drive(int r_pwm, int l_pwm) {
+                                                    analogWrite(l1, 1);
+                                                    analogWrite(l2, l_pwm); 
+                                                    analogWrite(r1, 1);
+                                                    analogWrite(r2, r_pwm);
+                                                }
+                                                    
+                                                    // Slow decay mode
+                                                    void back(int r_pwm, int l_pwm) {
+                                                    analogWrite(l1, l_pwm);
+                                                    analogWrite(l2, 1);
+                                                    analogWrite(r1, r_pwm);
+                                                    analogWrite(r2, 1);
+                                                }
+                    </code>
+                    </pre>
+
+                <p>
+                    These changes still would not allow me to flip however. I then changed the code to instantly switch
+                    directions
+                    rather than braking the motors. In this implementation, I would drive forward at max PWM then
+                    instantly switch to reverse at max PWM. This allowed me to get the robot to flip.
+                    Note that I set the distance threshold to be 900mm. This is because the sticky mat I was flipping on
+                    began around 800mm from the wall and I wanted to add a bit of extra room.
+                </p>
+
+
+                <pre>
+                        <code>
+                            case FLIP_DRIVE:
+                            {
+                                start_time = millis();
+                                while(distance < DISTANCE_THRESHOLD){
+                                    // Check and interpolate distance, drive forward
+                                }
+
+                                time_to_drive = millis() - start_time + 100; // Time it took to drive forward, it will be slightly longer back due to the flip
+                                start_time = millis();
+
+                                while(millis() - start_time < time_to_drive)
+                                {
+                                    back(255,255);
+                                }
+                            }
+                      
+                        </code>
+                        </pre>
+
+                        <h3 class="mb-0">Successful Runs</h3>
+                        <p>
+                            The below videos show successful runs of the flip on the sticky mat.
+                        </p>
+
+                                <iframe width="100%" height="315"
+                                    src="https://www.youtube.com/embed/Y_XPxwvRwVU?si=fIxGeuDGMBaRgX0P" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen></iframe>
+
+                                <iframe width="100%" height="315"
+                                    src="https://www.youtube.com/embed/I7vwUYqiQxw?si=b_PtSNC2CaiwJI7B" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen></iframe>
+
+
+                                <iframe width="100%" height="315"
+                                    src="https://www.youtube.com/embed/l9_DmisoZow?si=Je9Gp-dbc6K2Tci9" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen></iframe>
+
+                            <p>
+                                The below shows the interpolated ToF and outputted PWM values. I used linear interpolation to update my distance rather than the KF 
+                                as I believed that this would allow me to avoid issues with tuning. Note that after flip, I cut the ToF sensor because 
+                                the robot had flipped and was no longer facing the wall. The PWM values outputted also are negated as the robot must change direction.
+                            </p>
+                            <img src="assets/img/lab8/distance vs time run 2.png" alt="Robot Flip" width="700" class="center-image">
+                            <img src="assets/img/lab8/pwm vs time run 2.png" alt="Robot Flip" width="700" class="center-image">
+
+
+                                
+                            <h3 class="mb-0">Blooper</h3>
+                            <p>
+                                I had a lot of crashes while testing the flip but this was a run where I accidentally inverted the motors 
+                                after switching to slow decay mode. Chaos ensued after the cut.
+                            </p>
+                            <iframe width="100%" height="315"
+                                src="https://www.youtube.com/embed/oOUyTSuo0rk?si=JB-uy2iOLFzUnWFE" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen></iframe>
+
+                                <h3 class="mb-0">Discussion</h3>
+                                <p>
+                                    This lab was a lot of fun to implement the stunts on the robot. I did note that the robot would sometimes flip 
+                                    off at an angle. I believe this is due to the motor imbalances. I had previously calibrated these imbalances however I removed 
+                                    this calibration to be able to run the motors at max PWM for this lab. 
+                                </p>
+
+
+            </div>
 
         </section>
 
