@@ -40,6 +40,7 @@
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 6">Lab 6</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 7">Lab 7</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 8">Lab 8</a></li>
+                <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 9">Lab 9</a></li>
 
             </ul>
         </div>
@@ -2226,6 +2227,165 @@
                 </p>
 
 
+            </div>
+
+        </section>
+
+
+
+
+
+
+        <section class="resume-section" id="Lab 9">
+            <div class="resume-section-content">
+                <h2 class="mb-0">Lab 9</h2>
+                <p>
+                    In this lab, we will map our a static room using the ToF sensor. We will use this map in future labs for localization and navigation. 
+                    To accomplish this, we place the robot in multiple positions and perform a 'scan' of the room by rotating the robot. 
+                    To perform the scan, we utilize our angular PID controller to rotate the robot to various setpoints.
+                </p>
+
+                <h3 class="mb-0">Task 1: Control</h3>
+                <p>
+                    We choose to use orientation control to rotate the robot to various setpoints. To do this, we utilize DMP 
+                    to get the yaw of the robot as this is more accurate than using the gyroscope. To tune the PID controller for 
+                    small increments, we significantly crank the P value to 8, much higher than the previous labs. This gives us 
+                    a controller that looks like this when scanning:
+                </p>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/dQy2RhXY-E8" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <p>
+                    The above video shows the robot scanning in a circle. As we are using DMP to get the yaw, suffer from less drift.
+                    We do notice that the robot cannot perfectly turn in place, which would cause us to get slight errors in our ToF data. 
+                    This however is very slight and assuming a 4x4m empty room, we would likely only be off by at max 10cm. I found this as 
+                    I noticed the robot would drift at max around 10cm from the start point. In average cases, we would be off by around 5cm. In 
+                    addition, as the ToF sensor is not centered on the robot, we need to add a 7cm offset to the measurements.
+
+                </p>
+                <img src="assets/img/lab9/center.jpg" alt="Room Scan Visualization" width="350" class="center-image">
+
+                <p> We record the yaw values from our scan. As we can see from the graph, we are able to control the yaw in relatively 
+                    consistent angle intervals. Note that because we are ranging our ToF sensor in between turns, we do not poll the DMP 
+                    and therefore the yaw values do not always update. We notice that we are consistently able to hit setpoints to a 
+                    reasonable degree.
+                    </p>
+                <img src="assets/img/lab9/better yaw vs time.png" alt="Room Scan Visualization" width="600" class="center-image">
+
+
+
+
+                <h3 class="mb-0">Task 2: Read out Distances</h3>
+                <p>
+                    There are multiple marked positions in the lab (-3,-2), (5,3), (0,3) and (-5,-3). We perform our scan in each of these positions with 
+                    the following code:
+                </p>
+                <pre>
+                    <code>
+                        while (scans < 15) {
+                            poll_dmt();
+                            start_time = millis();
+                            while(millis() - start_time < 1000)
+                            {
+                              curr_pwm = PID_Turn(yaw, setpoint);
+                              poll_dmt();
+                            }
+                            diff_drive(0,0);          
+                            int dist = 0;
+                            for(int i = 0; i < 3; i++)
+                            {
+                              while(!distanceSensor.checkForDataReady())
+                              {
+                                delay(1);
+                              }
+                              dist += distanceSensor.getDistance();
+                            }
+                  
+                            dist /= 3;
+                  
+                            yaw_arr[scans] = yaw;
+                            tof_ranges[scans] = dist;
+                  
+                            setpoint = (setpoint + 25) % 360;
+                            integral = 0.0; // reset integral term for next pid turn
+                            scans ++;
+                          }
+                    </code>
+                </pre>
+                <p> We rotate the robot in 25 degree increments for 14 iterations. For each setpoint, we wait until we 
+                    are stationary and take 3 ToF samples and average them to get a less noisy reading. 
+                    Because we do not fully hit the setpoint everytime, we return the current yaw of the robot rather than the setpoint when sending back data. This allows 
+                    us to account for some of the PID error as we are not fully reliant on hitting the setpoint perfectly. Below shows our 
+                    individual polar plots for each position. For each position, we take 14 samples. While these can't show the full map,
+                    they give a good indication of the surrounding features.
+                </p>
+                <img src="assets/img/lab9/-3,-2.png" alt="Room Scan Visualization" width="600" class="center-image">
+                <img src="assets/img/lab9/0,3.png" alt="Room Scan Visualization" width="600" class="center-image">
+                <img src="assets/img/lab9/5,-3.png" alt="Room Scan Visualization" width="600" class="center-image">
+                <img src="assets/img/lab9/5,3.png" alt="Room Scan Visualization" width="600" class="center-image">
+
+                <p> In order to test precision, we can run the robot in a scan twice. This allows us to overlay the two 
+                    scans to see how well we can repeat the scan. From the below graph, we can see that we are able to 
+                    reasonably repeat the scan within the error range of the ToF sensor. Note that the blue trial has 
+                    a point that is significantly closer. This is because there was another robot running trials at the time. 
+                    </p>
+                <img src="assets/img/lab9/two runs.png" alt="Room Scan Visualization" width="600" class="center-image">
+
+                <h3 class="mb-0">Task 3: Merge Readings</h3>
+                <p> In order to merge the readings, we can take advantage of the homogenous transformation matrix. 
+                    </p>
+                    <img src="assets/img/lab9/transformation matrix.png" alt="Room Scan Visualization" width="600" class="center-image">
+                    <p> We can keep the rotational component as the identity matrix as I made sure to keep the robot facing the same 
+                        direction when beginning scans. The translation component is then simply the displacement from the origin. 
+                        We can keep the Z component at 0 and vary X and Y depending on the point we are at. Note that I used the 2D transformation 
+                        matrix as we are not operating in Z. We know that the 
+                        floor tiles marking the points are in feet, so we can convert them to mm to get our translation. We then apply 
+                        the transformation to the points in the local maps. The below code 
+                        shows our transformation matrix:
+                        </p>
+
+                        <pre>
+                            <code>
+                                # Relative to origin
+                                cx_mm = cx_ft * 304.8 # Convert ft to mm
+                                cy_mm = cy_ft * 304.8
+                                dx = cx_mm - origin_cx_mm
+                                dy = cy_mm - origin_cy_mm
+                            
+                                # Translation matrix
+                                T = np.array([
+                                    [1, 0, dx],
+                                    [0, 1, dy],
+                                    [0, 0,  1]
+                                ])
+                            
+                                # Apply transformation
+                                global_map = T @ local_map 
+
+                            </code>
+                        </pre>
+
+                    <p>
+                        Upon plotting the data, we receive a map that looks like this. Note that I needed to invert the yaw values to treat clockwise as positive 
+                        rotation as this was the way DMP was oriented:
+                    </p>
+                    <img src="assets/img/lab9/best global map no post processing.png" alt="Room Scan Visualization" width="600" class="center-image">
+                    <h3 class="mb-0">Task 4: Convert to Line-Based Map</h3>
+                    <p> After looking at my merged map, I notice that the data looks slightly crooked. Upon inspection of my 
+                        data, I realized that the zero point I was using was not aligned. To fix this, I simply added a offset to all of the yaw data 
+                        netting the below graph. 
+                        </p>
+                        <img src="assets/img/lab9/best global map.png" alt="Room Scan Visualization" width="600" class="center-image">
+                    <p> We can then draw an estimate of the walls and obstacles over our scatter plot. There are definitely some outliers in 
+                        the data however many of them are due to other robots in the lab at the time. The outliers that overshoot 
+                        are likely due to noise and sensor error. 
+                        </p>
+                        <img src="assets/img/lab9/global map with polygon.png" alt="Room Scan Visualization" width="600" class="center-image">
+                        <h3 class="mb-0">Discussion</h3>
+                        <p>
+                            After reviewing my maps, I realized that I should have taken more datapoints per scan. I only took 14 samples 
+                            perscan and I believe that this was not enough to get strong estimates of the room, especially when scanning points that 
+                            were far away. While this made PID control easier to tune, this also made the data much more spaced than I would have liked. 
+                            </p>
+                    
             </div>
 
         </section>
