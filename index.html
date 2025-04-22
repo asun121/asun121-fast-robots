@@ -41,6 +41,7 @@
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 7">Lab 7</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 8">Lab 8</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 9">Lab 9</a></li>
+                <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 10">Lab 10</a></li>
 
             </ul>
         </div>
@@ -2032,10 +2033,13 @@
                         </p>
                         <img src="assets/img/lab7/unnamed.png" class="img-fluid" alt="Kalman Filter Curve" width="500">
                         <p>
-                            I realized that I made a mistake where I called the KF every iteration of the control loop. This meant that 
-                            the KF would be ran even if I did not have new ToF measurement. I then changed the code to only run the KF when I had a new ToF measurement. This netted the
+                            I realized that I made a mistake where I called the KF every iteration of the control loop.
+                            This meant that
+                            the KF would be ran even if I did not have new ToF measurement. I then changed the code to
+                            only run the KF when I had a new ToF measurement. This netted the
                             below graph. This however
-                            was still stepped as my ToF sensor was still returning identical values on seperate iterations but this was not
+                            was still stepped as my ToF sensor was still returning identical values on seperate
+                            iterations but this was not
                             an issue with the filter.
                         </p>
                         <img src="assets/img/lab7/best kf.png" class="img-fluid" alt="Kalman Filter Curve" width="500">
@@ -2240,42 +2244,59 @@
             <div class="resume-section-content">
                 <h2 class="mb-0">Lab 9</h2>
                 <p>
-                    In this lab, we will map our a static room using the ToF sensor. We will use this map in future labs for localization and navigation. 
-                    To accomplish this, we place the robot in multiple positions and perform a 'scan' of the room by rotating the robot. 
+                    In this lab, we will map our a static room using the ToF sensor. We will use this map in future labs
+                    for localization and navigation.
+                    To accomplish this, we place the robot in multiple positions and perform a 'scan' of the room by
+                    rotating the robot.
                     To perform the scan, we utilize our angular PID controller to rotate the robot to various setpoints.
                 </p>
 
                 <h3 class="mb-0">Task 1: Control</h3>
                 <p>
-                    We choose to use orientation control to rotate the robot to various setpoints. To do this, we utilize DMP 
-                    to get the yaw of the robot as this is more accurate than using the gyroscope. To tune the PID controller for 
-                    small increments, we significantly crank the P value to 8, much higher than the previous labs. This gives us 
+                    We choose to use orientation control to rotate the robot to various setpoints. To do this, we
+                    utilize DMP
+                    to get the yaw of the robot as this is more accurate than using the gyroscope. To tune the PID
+                    controller for
+                    small increments, we significantly crank the P value to 8, much higher than the previous labs. This
+                    gives us
                     a controller that looks like this when scanning:
                 </p>
-                <iframe width="560" height="315" src="https://www.youtube.com/embed/dQy2RhXY-E8" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/dQy2RhXY-E8" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
                 <p>
-                    The above video shows the robot scanning in a circle. As we are using DMP to get the yaw, suffer from less drift.
-                    We do notice that the robot cannot perfectly turn in place, which would cause us to get slight errors in our ToF data. 
-                    This however is very slight and assuming a 4x4m empty room, we would likely only be off by at max 10cm. I found this as 
-                    I noticed the robot would drift at max around 10cm from the start point. In average cases, we would be off by around 5cm. In 
-                    addition, as the ToF sensor is not centered on the robot, we need to add a 7cm offset to the measurements.
+                    The above video shows the robot scanning in a circle. As we are using DMP to get the yaw, suffer
+                    from less drift.
+                    We do notice that the robot cannot perfectly turn in place, which would cause us to get slight
+                    errors in our ToF data.
+                    This however is very slight and assuming a 4x4m empty room, we would likely only be off by at max
+                    10cm. I found this as
+                    I noticed the robot would drift at max around 10cm from the start point. In average cases, we would
+                    be off by around 5cm. In
+                    addition, as the ToF sensor is not centered on the robot, we need to add a 7cm offset to the
+                    measurements.
 
                 </p>
                 <img src="assets/img/lab9/center.jpg" alt="Room Scan Visualization" width="350" class="center-image">
 
-                <p> We record the yaw values from our scan. As we can see from the graph, we are able to control the yaw in relatively 
-                    consistent angle intervals. Note that because we are ranging our ToF sensor in between turns, we do not poll the DMP 
-                    and therefore the yaw values do not always update. We notice that we are consistently able to hit setpoints to a 
+                <p> We record the yaw values from our scan. As we can see from the graph, we are able to control the yaw
+                    in relatively
+                    consistent angle intervals. Note that because we are ranging our ToF sensor in between turns, we do
+                    not poll the DMP
+                    and therefore the yaw values do not always update. We notice that we are consistently able to hit
+                    setpoints to a
                     reasonable degree.
-                    </p>
-                <img src="assets/img/lab9/better yaw vs time.png" alt="Room Scan Visualization" width="600" class="center-image">
+                </p>
+                <img src="assets/img/lab9/better yaw vs time.png" alt="Room Scan Visualization" width="600"
+                    class="center-image">
 
 
 
 
                 <h3 class="mb-0">Task 2: Read out Distances</h3>
                 <p>
-                    There are multiple marked positions in the lab (-3,-2), (5,3), (0,3) and (-5,-3). We perform our scan in each of these positions with 
+                    There are multiple marked positions in the lab (-3,-2), (5,3), (0,3) and (-5,-3). We perform our
+                    scan in each of these positions with
                     the following code:
                 </p>
                 <pre>
@@ -2310,11 +2331,14 @@
                           }
                     </code>
                 </pre>
-                <p> We rotate the robot in 25 degree increments for 14 iterations. For each setpoint, we wait until we 
-                    are stationary and take 3 ToF samples and average them to get a less noisy reading. 
-                    Because we do not fully hit the setpoint everytime, we return the current yaw of the robot rather than the setpoint when sending back data. This allows 
-                    us to account for some of the PID error as we are not fully reliant on hitting the setpoint perfectly. Below shows our 
-                    individual polar plots for each position. For each position, we take 14 samples. While these can't show the full map,
+                <p> We rotate the robot in 25 degree increments for 14 iterations. For each setpoint, we wait until we
+                    are stationary and take 3 ToF samples and average them to get a less noisy reading.
+                    Because we do not fully hit the setpoint everytime, we return the current yaw of the robot rather
+                    than the setpoint when sending back data. This allows
+                    us to account for some of the PID error as we are not fully reliant on hitting the setpoint
+                    perfectly. Below shows our
+                    individual polar plots for each position. For each position, we take 14 samples. While these can't
+                    show the full map,
                     they give a good indication of the surrounding features.
                 </p>
                 <img src="assets/img/lab9/-3,-2.png" alt="Room Scan Visualization" width="600" class="center-image">
@@ -2322,27 +2346,33 @@
                 <img src="assets/img/lab9/5,-3.png" alt="Room Scan Visualization" width="600" class="center-image">
                 <img src="assets/img/lab9/5,3.png" alt="Room Scan Visualization" width="600" class="center-image">
 
-                <p> In order to test precision, we can run the robot in a scan twice. This allows us to overlay the two 
-                    scans to see how well we can repeat the scan. From the below graph, we can see that we are able to 
-                    reasonably repeat the scan within the error range of the ToF sensor. Note that the blue trial has 
-                    a point that is significantly closer. This is because there was another robot running trials at the time. 
-                    </p>
+                <p> In order to test precision, we can run the robot in a scan twice. This allows us to overlay the two
+                    scans to see how well we can repeat the scan. From the below graph, we can see that we are able to
+                    reasonably repeat the scan within the error range of the ToF sensor. Note that the blue trial has
+                    a point that is significantly closer. This is because there was another robot running trials at the
+                    time.
+                </p>
                 <img src="assets/img/lab9/two runs.png" alt="Room Scan Visualization" width="600" class="center-image">
 
                 <h3 class="mb-0">Task 3: Merge Readings</h3>
-                <p> In order to merge the readings, we can take advantage of the homogenous transformation matrix. 
-                    </p>
-                    <img src="assets/img/lab9/transformation matrix.png" alt="Room Scan Visualization" width="600" class="center-image">
-                    <p> We can keep the rotational component as the identity matrix as I made sure to keep the robot facing the same 
-                        direction when beginning scans. The translation component is then simply the displacement from the origin. 
-                        We can keep the Z component at 0 and vary X and Y depending on the point we are at. Note that I used the 2D transformation 
-                        matrix as we are not operating in Z. We know that the 
-                        floor tiles marking the points are in feet, so we can convert them to mm to get our translation. We then apply 
-                        the transformation to the points in the local maps. The below code 
-                        shows our transformation matrix:
-                        </p>
+                <p> In order to merge the readings, we can take advantage of the homogenous transformation matrix.
+                </p>
+                <img src="assets/img/lab9/transformation matrix.png" alt="Room Scan Visualization" width="600"
+                    class="center-image">
+                <p> We can keep the rotational component as the identity matrix as I made sure to keep the robot facing
+                    the same
+                    direction when beginning scans. The translation component is then simply the displacement from the
+                    origin.
+                    We can keep the Z component at 0 and vary X and Y depending on the point we are at. Note that I used
+                    the 2D transformation
+                    matrix as we are not operating in Z. We know that the
+                    floor tiles marking the points are in feet, so we can convert them to mm to get our translation. We
+                    then apply
+                    the transformation to the points in the local maps. The below code
+                    shows our transformation matrix:
+                </p>
 
-                        <pre>
+                <pre>
                             <code>
                                 # Relative to origin
                                 cx_mm = cx_ft * 304.8 # Convert ft to mm
@@ -2363,31 +2393,508 @@
                             </code>
                         </pre>
 
-                    <p>
-                        Upon plotting the data, we receive a map that looks like this. Note that I needed to invert the yaw values to treat clockwise as positive 
-                        rotation as this was the way DMP was oriented:
-                    </p>
-                    <img src="assets/img/lab9/best global map no post processing.png" alt="Room Scan Visualization" width="600" class="center-image">
-                    <h3 class="mb-0">Task 4: Convert to Line-Based Map</h3>
-                    <p> After looking at my merged map, I notice that the data looks slightly crooked. Upon inspection of my 
-                        data, I realized that the angle I was using to zero the robot was not aligned with the DMP. To fix this, I simply added a offset to all of the yaw data 
-                        netting the below graph. 
-                        </p>
-                        <img src="assets/img/lab9/best global map.png" alt="Room Scan Visualization" width="600" class="center-image">
-                    <p> We can then draw an estimate of the walls and obstacles over our scatter plot. There are definitely some outliers in 
-                        the data however many of them are due to other robots in the lab at the time. The outliers that overshoot 
-                        are likely due to noise and sensor error. 
-                        </p>
-                        <img src="assets/img/lab9/global map with polygon.png" alt="Room Scan Visualization" width="600" class="center-image">
-                        <h3 class="mb-0">Discussion</h3>
-                        <p>
-                            After reviewing my maps, I realized that I should have taken more datapoints per scan. I only took 14 samples 
-                            perscan and I believe that this was not enough to get strong estimates of the room, especially when scanning points that 
-                            were far away. While this made PID control easier to tune, this also made the data much more spaced than I would have liked. 
-                            </p>
-                    
+                <p>
+                    Upon plotting the data, we receive a map that looks like this. Note that I needed to invert the yaw
+                    values to treat clockwise as positive
+                    rotation as this was the way DMP was oriented:
+                </p>
+                <img src="assets/img/lab9/best global map no post processing.png" alt="Room Scan Visualization"
+                    width="600" class="center-image">
+                <h3 class="mb-0">Task 4: Convert to Line-Based Map</h3>
+                <p> After looking at my merged map, I notice that the data looks slightly crooked. Upon inspection of my
+                    data, I realized that the angle I was using to zero the robot was not aligned with the DMP. To fix
+                    this, I simply added a offset to all of the yaw data
+                    netting the below graph.
+                </p>
+                <img src="assets/img/lab9/best global map.png" alt="Room Scan Visualization" width="600"
+                    class="center-image">
+                <p> We can then draw an estimate of the walls and obstacles over our scatter plot. There are definitely
+                    some outliers in
+                    the data however many of them are due to other robots in the lab at the time. The outliers that
+                    overshoot
+                    are likely due to noise and sensor error.
+                </p>
+                <img src="assets/img/lab9/global map with polygon.png" alt="Room Scan Visualization" width="600"
+                    class="center-image">
+                <h3 class="mb-0">Discussion</h3>
+                <p>
+                    After reviewing my maps, I realized that I should have taken more datapoints per scan. I only took
+                    14 samples
+                    perscan and I believe that this was not enough to get strong estimates of the room, especially when
+                    scanning points that
+                    were far away. While this made PID control easier to tune, this also made the data much more spaced
+                    than I would have liked.
+                </p>
+
             </div>
 
+        </section>
+
+
+
+        <section class="resume-section" id="Lab 10">
+            <div class="resume-section-content">
+                <h2 class="mb-0">Lab 10</h2>
+                <p>
+                    This lab is focused on implement localization with the Bayes filter in a simulated environment. We
+                    do this by implementing a set
+                    of functions that allow us to perform filtering.
+                </p>
+                <h3 class="mb-0">Compute Control</h3>
+                <pre>
+                    <code>
+                        def compute_control(cur_pose, prev_pose):
+                            """ Given the current and previous odometry poses, this function extracts
+                            the control information based on the odometry motion model.
+                        
+                            Args:
+                                cur_pose  ([Pose]): Current Pose
+                                prev_pose ([Pose]): Previous Pose 
+                        
+                            Returns:
+                                [delta_rot_1]: Rotation 1  (degrees)
+                                [delta_trans]: Translation (meters)
+                                [delta_rot_2]: Rotation 2  (degrees)
+                            """
+                            delta_rot_1 = mapper.normalize_angle(math.atan2((cur_pose[1] - prev_pose[1]), (cur_pose[0] - prev_pose[0])) - prev_pose[2])
+                            delta_trans = math.sqrt((cur_pose[1] - prev_pose[1])**2 + (cur_pose[0] - prev_pose[0])**2)
+                            delta_rot_2 = mapper.normalize_angle(cur_pose[2] - math.atan2((cur_pose[1] - prev_pose[1]),(cur_pose[0] - prev_pose[0])))
+                        
+                            return delta_rot_1, delta_trans, delta_rot_2
+                    </code>
+                </pre>
+                <p> The above code shows the compute control function. Taking in the current and previous pose, we are
+                    able to determine the first rotation, translation and second rotation. We can find the first
+                    rotation by
+                    taking the arctangent of the difference in Y and X coordinates then normalizing. For translation,
+                    we can simply use the distance formula. Finally, we can find the second rotation by taking the
+                    difference between the current pose and the arctangent of the difference in Y and X coordinates.
+                </p>
+
+                <h3 class="mb-0">Odom Motion Model</h3>
+                <pre>
+                    <code>
+                        def odom_motion_model(cur_pose, prev_pose, u):
+                            """ Odometry Motion Model
+                        
+                            Args:
+                                cur_pose  ([Pose]): Current Pose
+                                prev_pose ([Pose]): Previous Pose
+                                (rot1, trans, rot2) (float, float, float): A tuple with control data in the format 
+                                                                        format (rot1, trans, rot2) with units (degrees, meters, degrees)
+                        
+                            
+                            Returns:
+                                prob [float]: Probability p(x'|x, u)
+                            """
+                            ctr = compute_control(cur_pose, prev_pose)
+                        
+                            pr_rot1 = loc.gaussian(u[0], ctr[0], loc.odom_rot_sigma)
+                            pr_trans = loc.gaussian(u[1], ctr[1], loc.odom_trans_sigma)
+                            pr_rot3 = loc.gaussian(u[2], ctr[2], loc.odom_rot_sigma)
+                        
+                        
+                            prob = pr_rot1 * pr_trans * pr_rot3
+                            
+                            return prob
+                    </code>
+                </pre>
+                <p> The above code shows the odometry motion model. This function takes in the current and previous pose
+                    along with control data and
+                    returns the probability that we arrive at the current position given the previous position and
+                    control data. We can do this by using the
+                    Gaussian function to find the probability of each of the three components. We can then multiply
+                    these probabilities together to get the
+                    final probability. The sigma values signify our confidence in the odometry model.
+                </p>
+
+                <h3 class="mb-0">Prediction Step</h3>
+                <pre>
+                        <code>
+                            def prediction_step(cur_odom, prev_odom):
+                                """ Prediction step of the Bayes Filter.
+                                Update the probabilities in loc.bel_bar based on loc.bel from the previous time step and the odometry motion model.
+
+                                Args:
+                                    cur_odom  ([Pose]): Current Pose
+                                    prev_odom ([Pose]): Previous Pose
+                                """
+                                u = compute_control(cur_odom, prev_odom)
+                                for x_last in range(mapper.MAX_CELLS_X):
+                                    for y_last in range(mapper.MAX_CELLS_Y):
+                                        for theta_last in range(mapper.MAX_CELLS_A):
+                                            
+                                            bel = loc.bel[(x_last,y_last,theta_last)]
+                                            if(bel > 0.0001):
+                                                for x in range(mapper.MAX_CELLS_X):
+                                                    for y in range(mapper.MAX_CELLS_Y):
+                                                        for theta in range(mapper.MAX_CELLS_A):
+                                                            prob = odom_motion_model(mapper.from_map(x,y,theta), mapper.from_map(x_last,y_last,theta_last),u)
+                                                            loc.bel_bar[(x,y,theta)] += prob * bel
+
+
+                        </code>
+                    </pre>
+                <p> The above code shows the prediction step of our filter. We loop through each grid cell and calculate
+                    the probability
+                    that the robot will move to another grid cell. Looking at Daoyuan Jin's (2024) code, I saw that he
+                    sped up the
+                    prediction by setting a belief threshhold of 0.0001. This cuts out many calculations and speeds up
+                    the filter.
+                </p>
+                <h3 class="mb-0">Sensor Model</h3>
+                <pre>
+                    <code>
+                        def sensor_model(obs):
+                            """ This is the equivalent of p(z|x).
+
+
+                            Args:
+                                obs ([ndarray]): A 1D array consisting of the true observations for a specific robot pose in the map 
+
+                            Returns:
+                                [ndarray]: Returns a 1D array of size 18 (=loc.OBS_PER_CELL) with the likelihoods of each individual sensor measurement
+                            """
+                            prob_array = np.zeros(mapper.OBS_PER_CELL)
+                            for i in range(mapper.OBS_PER_CELL):
+                                prob_array[i] = loc.gaussian(loc.obs_range_data[i], obs[i], loc.sensor_sigma)    
+
+                            return prob_array
+                    </code>
+                </pre>
+
+                <p>
+                    We generate an array of probabilities corresponding to each sensor measurement. This allows us to
+                    assess the likeliness of sensors corresponding to the ground truth of the current pose on the grid
+                </p>
+
+                <h3 class="mb-0">Update Step</h3>
+                <pre>
+                    <code>
+                        def update_step():
+                            """ Update step of the Bayes Filter.
+                            Update the probabilities in loc.bel based on loc.bel_bar and the sensor model.
+                            """
+                        
+                            for x in range(mapper.MAX_CELLS_X):
+                                for y in range(mapper.MAX_CELLS_Y):
+                                    for theta in range(mapper.MAX_CELLS_A):
+                                        loc.bel[(x,y,theta)] = np.prod(sensor_model(mapper.get_views(x,y,theta)) * loc.bel_bar[(x,y,theta)])
+                        
+                            loc.bel = loc.bel / np.sum(loc.bel)
+
+                    </code>
+                </pre>
+
+                <p>
+                    In our update step, we simply loop through each grid cell and update the belief based on the sensor
+                    model and
+                    prior belief. We then normalize the belief to ensure that underflow does not occur.
+                </p>
+
+                <h3 class="mb-0">Results</h3>
+                <p>
+                    The below plots show 2 runs of my simulation. Immedietly we can see that the Bayes filter gives a
+                    strong estimate of the robot's position.
+                    In my runs I notice that the filter is stronger when near the walls and around the box. I believe
+                    this is because there is more
+                    distinguishing characteristics which allows the filter to only believe the robot can be in a few
+                    places.
+                </p>
+                <img src="assets/img/lab10/first run.png" alt="Bayes Filter Simulation" width="600"
+                    class="center-image">
+                <img src="assets/img/lab10/second run.png" alt="Bayes Filter Simulation" width="600"
+                    class="center-image">
+
+                <p>
+                    The below video shows the simulation running.
+                </p>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/dCabTiyTMOg" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+                
+                <p>
+                    I also got a log of the data from the simulation shown in the below:
+                    </p>
+                    <pre>
+                    <code>
+                    
+----------------- 0 -----------------
+2025-04-21 20:11:01,818 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:01,824 | INFO     |: GT index         : (6, 3, 7)
+2025-04-21 20:11:01,825 | INFO     |: Prior Bel index  : (6, 4, 9) with prob = 0.5865045
+2025-04-21 20:11:01,826 | INFO     |: POS ERROR        : (-0.013, -0.090, -49.725)
+2025-04-21 20:11:01,828 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:05,582 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:11:05,600 | INFO     |: GT index      : (6, 3, 7)
+2025-04-21 20:11:05,601 | INFO     |: Bel index     : (6, 4, 6) with prob = 0.6837452
+2025-04-21 20:11:05,602 | INFO     |: Bel_bar prob at index = 0.001200863200335884
+2025-04-21 20:11:05,602 | INFO     |: GT            : (0.291, -0.090, 320.275)
+2025-04-21 20:11:05,602 | INFO     |: Belief        : (0.305, 0.000, -50.000)
+2025-04-21 20:11:05,604 | INFO     |: POS ERROR     : (-0.013, -0.090, 370.275)
+2025-04-21 20:11:05,606 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+----------------- 1 -----------------
+2025-04-21 20:11:07,745 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:07,756 | INFO     |: GT index         : (7, 2, 5)
+2025-04-21 20:11:07,757 | INFO     |: Prior Bel index  : (6, 4, 9) with prob = 0.5865048
+2025-04-21 20:11:07,758 | INFO     |: POS ERROR        : (0.210, -0.528, 286.975)
+2025-04-21 20:11:07,760 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:11,136 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:11:11,139 | INFO     |: GT index      : (7, 2, 5)
+2025-04-21 20:11:11,140 | INFO     |: Bel index     : (6, 2, 5) with prob = 0.9999999
+2025-04-21 20:11:11,140 | INFO     |: Bel_bar prob at index = 0.000515075711575808
+2025-04-21 20:11:11,141 | INFO     |: GT            : (0.514, -0.528, 656.975)
+2025-04-21 20:11:11,142 | INFO     |: Belief        : (0.305, -0.610, -70.000)
+2025-04-21 20:11:11,142 | INFO     |: POS ERROR     : (0.210, 0.081, 726.975)
+2025-04-21 20:11:11,143 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+----------------- 2 -----------------
+2025-04-21 20:11:12,231 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:12,248 | INFO     |: GT index         : (7, 2, 4)
+2025-04-21 20:11:12,249 | INFO     |: Prior Bel index  : (5, 2, 3) with prob = 0.6553140
+2025-04-21 20:11:12,249 | INFO     |: POS ERROR        : (0.514, 0.081, 744.055)
+2025-04-21 20:11:12,251 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:16,099 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:11:16,109 | INFO     |: GT index      : (7, 2, 4)
+2025-04-21 20:11:16,110 | INFO     |: Bel index     : (6, 2, 4) with prob = 1.0
+2025-04-21 20:11:16,111 | INFO     |: Bel_bar prob at index = 0.0005145065122474992
+2025-04-21 20:11:16,111 | INFO     |: GT            : (0.514, -0.528, 994.055)
+2025-04-21 20:11:16,112 | INFO     |: Belief        : (0.305, -0.610, -90.000)
+2025-04-21 20:11:16,112 | INFO     |: POS ERROR     : (0.210, 0.081, 1084.055)
+2025-04-21 20:11:16,113 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+----------------- 3 -----------------
+2025-04-21 20:11:17,258 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:17,266 | INFO     |: GT index         : (7, 0, 4)
+2025-04-21 20:11:17,267 | INFO     |: Prior Bel index  : (4, 0, 4) with prob = 0.8595106
+2025-04-21 20:11:17,268 | INFO     |: POS ERROR        : (0.847, 0.292, 1084.055)
+2025-04-21 20:11:17,270 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:21,019 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:11:21,038 | INFO     |: GT index      : (7, 0, 4)
+2025-04-21 20:11:21,039 | INFO     |: Bel index     : (7, 1, 4) with prob = 1.0
+2025-04-21 20:11:21,040 | INFO     |: Bel_bar prob at index = 0.0005437912915977165
+2025-04-21 20:11:21,040 | INFO     |: GT            : (0.543, -0.927, 1354.055)
+2025-04-21 20:11:21,040 | INFO     |: Belief        : (0.610, -0.914, -90.000)
+2025-04-21 20:11:21,041 | INFO     |: POS ERROR     : (-0.067, -0.013, 1444.055)
+2025-04-21 20:11:21,042 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+----------------- 4 -----------------
+2025-04-21 20:11:24,150 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:24,166 | INFO     |: GT index         : (8, 0, 8)
+2025-04-21 20:11:24,167 | INFO     |: Prior Bel index  : (4, 0, 4) with prob = 0.8595106
+2025-04-21 20:11:24,167 | INFO     |: POS ERROR        : (1.115, 0.146, 1529.042)
+2025-04-21 20:11:24,168 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:27,980 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:11:27,990 | INFO     |: GT index      : (8, 0, 8)
+2025-04-21 20:11:27,991 | INFO     |: Bel index     : (8, 1, 9) with prob = 1.0
+2025-04-21 20:11:27,992 | INFO     |: Bel_bar prob at index = 0.0005145616680653931
+2025-04-21 20:11:27,992 | INFO     |: GT            : (0.810, -1.074, 1799.997)
+2025-04-21 20:11:27,993 | INFO     |: Belief        : (0.914, -0.914, 10.000)
+2025-04-21 20:11:27,995 | INFO     |: POS ERROR     : (-0.104, -0.159, 1789.997)
+2025-04-21 20:11:27,995 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+----------------- 5 -----------------
+2025-04-21 20:11:34,112 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:34,126 | INFO     |: GT index         : (11, 1, 11)
+2025-04-21 20:11:34,127 | INFO     |: Prior Bel index  : (4, 0, 4) with prob = 0.8595106
+2025-04-21 20:11:34,130 | INFO     |: POS ERROR        : (1.899, 0.306, 1939.375)
+2025-04-21 20:11:34,133 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:37,498 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:11:37,510 | INFO     |: GT index      : (11, 1, 11)
+2025-04-21 20:11:37,511 | INFO     |: Bel index     : (9, 0, 10) with prob = 1.0
+2025-04-21 20:11:37,511 | INFO     |: Bel_bar prob at index = 0.6456620603957459
+2025-04-21 20:11:37,512 | INFO     |: GT            : (1.594, -0.913, 2209.375)
+2025-04-21 20:11:37,513 | INFO     |: Belief        : (1.219, -1.219, 30.000)
+2025-04-21 20:11:37,513 | INFO     |: POS ERROR     : (0.375, 0.306, 2179.375)
+2025-04-21 20:11:37,514 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+----------------- 6 -----------------
+2025-04-21 20:11:39,679 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:39,695 | INFO     |: GT index         : (11, 2, 12)
+2025-04-21 20:11:39,696 | INFO     |: Prior Bel index  : (10, 0, 11) with prob = 1.0876907
+2025-04-21 20:11:39,696 | INFO     |: POS ERROR        : (0.150, 0.698, 2188.507)
+2025-04-21 20:11:39,697 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:43,445 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:11:43,454 | INFO     |: GT index      : (11, 2, 12)
+2025-04-21 20:11:43,455 | INFO     |: Bel index     : (10, 2, 12) with prob = 0.9960824
+2025-04-21 20:11:43,458 | INFO     |: Bel_bar prob at index = 0.0005167027382368399
+2025-04-21 20:11:43,459 | INFO     |: GT            : (1.674, -0.521, 2598.506)
+2025-04-21 20:11:43,460 | INFO     |: Belief        : (1.524, -0.610, 70.000)
+2025-04-21 20:11:43,461 | INFO     |: POS ERROR     : (0.150, 0.088, 2528.506)
+2025-04-21 20:11:43,463 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+----------------- 7 -----------------
+2025-04-21 20:11:45,563 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:45,567 | INFO     |: GT index         : (11, 3, 13)
+2025-04-21 20:11:45,568 | INFO     |: Prior Bel index  : (10, 0, 11) with prob = 1.0876907
+2025-04-21 20:11:45,569 | INFO     |: POS ERROR        : (0.222, 1.051, 2554.237)
+2025-04-21 20:11:45,570 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:48,918 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:11:48,929 | INFO     |: GT index      : (11, 3, 13)
+2025-04-21 20:11:48,931 | INFO     |: Bel index     : (11, 3, 13) with prob = 1.0
+2025-04-21 20:11:48,932 | INFO     |: Bel_bar prob at index = 0.0008547055251947457
+2025-04-21 20:11:48,933 | INFO     |: GT            : (1.746, -0.169, 2964.333)
+2025-04-21 20:11:48,933 | INFO     |: Belief        : (1.829, -0.305, 90.000)
+2025-04-21 20:11:48,936 | INFO     |: POS ERROR     : (-0.083, 0.136, 2874.333)
+2025-04-21 20:11:48,937 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+----------------- 8 -----------------
+2025-04-21 20:11:52,041 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:52,055 | INFO     |: GT index         : (11, 5, 14)
+2025-04-21 20:11:52,056 | INFO     |: Prior Bel index  : (10, 0, 11) with prob = 1.0876907
+2025-04-21 20:11:52,057 | INFO     |: POS ERROR        : (0.220, 1.551, 2936.778)
+2025-04-21 20:11:52,057 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:55,702 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:11:55,705 | INFO     |: GT index      : (11, 5, 14)
+2025-04-21 20:11:55,706 | INFO     |: Bel index     : (11, 5, 14) with prob = 0.9998969
+2025-04-21 20:11:55,708 | INFO     |: Bel_bar prob at index = 0.004918778369643369
+2025-04-21 20:11:55,710 | INFO     |: GT            : (1.744, 0.331, 3347.351)
+2025-04-21 20:11:55,711 | INFO     |: Belief        : (1.829, 0.305, 110.000)
+2025-04-21 20:11:55,713 | INFO     |: POS ERROR     : (-0.085, 0.027, 3237.351)
+2025-04-21 20:11:55,714 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+----------------- 9 -----------------
+2025-04-21 20:11:58,796 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:11:58,810 | INFO     |: GT index         : (11, 6, 16)
+2025-04-21 20:11:58,812 | INFO     |: Prior Bel index  : (10, 0, 11) with prob = 1.0876907
+2025-04-21 20:11:58,813 | INFO     |: POS ERROR        : (0.219, 1.875, 3335.544)
+2025-04-21 20:11:58,815 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:12:02,701 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:12:02,712 | INFO     |: GT index      : (11, 6, 16)
+2025-04-21 20:12:02,712 | INFO     |: Bel index     : (11, 7, 16) with prob = 1.0
+2025-04-21 20:12:02,713 | INFO     |: Bel_bar prob at index = 0.6496010397010737
+2025-04-21 20:12:02,713 | INFO     |: GT            : (1.743, 0.656, 3746.499)
+2025-04-21 20:12:02,714 | INFO     |: Belief        : (1.829, 0.914, 150.000)
+2025-04-21 20:12:02,714 | INFO     |: POS ERROR     : (-0.086, -0.258, 3596.499)
+2025-04-21 20:12:02,715 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+----------------- 10 -----------------
+2025-04-21 20:12:04,792 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:12:04,794 | INFO     |: GT index         : (10, 7, 16)
+2025-04-21 20:12:04,794 | INFO     |: Prior Bel index  : (10, 0, 11) with prob = 1.0876907
+2025-04-21 20:12:04,795 | INFO     |: POS ERROR        : (-0.205, 2.156, 3707.578)
+2025-04-21 20:12:04,795 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:12:08,219 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:12:08,235 | INFO     |: GT index      : (10, 7, 16)
+2025-04-21 20:12:08,236 | INFO     |: Bel index     : (10, 7, 16) with prob = 1.0
+2025-04-21 20:12:08,237 | INFO     |: Bel_bar prob at index = 0.2486745112916887
+2025-04-21 20:12:08,238 | INFO     |: GT            : (1.319, 0.937, 4117.770)
+2025-04-21 20:12:08,239 | INFO     |: Belief        : (1.524, 0.914, 150.000)
+2025-04-21 20:12:08,240 | INFO     |: POS ERROR     : (-0.205, 0.022, 3967.770)
+2025-04-21 20:12:08,243 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+----------------- 11 -----------------
+2025-04-21 20:12:11,397 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:12:11,412 | INFO     |: GT index         : (7, 6, 3)
+2025-04-21 20:12:11,412 | INFO     |: Prior Bel index  : (10, 0, 11) with prob = 1.0876907
+2025-04-21 20:12:11,413 | INFO     |: POS ERROR        : (-1.099, 2.055, 4164.008)
+2025-04-21 20:12:11,414 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:12:15,147 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:12:15,160 | INFO     |: GT index      : (7, 6, 3)
+2025-04-21 20:12:15,161 | INFO     |: Bel index     : (7, 7, 3) with prob = 0.9999987
+2025-04-21 20:12:15,164 | INFO     |: Bel_bar prob at index = 0.09067102063965905
+2025-04-21 20:12:15,166 | INFO     |: GT            : (0.425, 0.836, 4574.008)
+2025-04-21 20:12:15,167 | INFO     |: Belief        : (0.610, 0.914, -110.000)
+2025-04-21 20:12:15,168 | INFO     |: POS ERROR     : (-0.185, -0.078, 4684.008)
+2025-04-21 20:12:15,169 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+----------------- 12 -----------------
+2025-04-21 20:12:17,244 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:12:17,259 | INFO     |: GT index         : (6, 4, 5)
+2025-04-21 20:12:17,260 | INFO     |: Prior Bel index  : (8, 5, 6) with prob = 1.1902763
+2025-04-21 20:12:17,261 | INFO     |: POS ERROR        : (-0.668, -0.094, 4669.855)
+2025-04-21 20:12:17,262 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:12:20,916 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:12:20,921 | INFO     |: GT index      : (6, 4, 5)
+2025-04-21 20:12:20,922 | INFO     |: Bel index     : (6, 5, 5) with prob = 1.0
+2025-04-21 20:12:20,923 | INFO     |: Bel_bar prob at index = 0.38517530898292607
+2025-04-21 20:12:20,924 | INFO     |: GT            : (0.246, 0.211, 4979.855)
+2025-04-21 20:12:20,925 | INFO     |: Belief        : (0.305, 0.305, -70.000)
+2025-04-21 20:12:20,926 | INFO     |: POS ERROR     : (-0.059, -0.094, 5049.855)
+2025-04-21 20:12:20,927 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+----------------- 13 -----------------
+2025-04-21 20:12:23,024 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:12:23,041 | INFO     |: GT index         : (5, 3, 2)
+2025-04-21 20:12:23,042 | INFO     |: Prior Bel index  : (8, 5, 6) with prob = 1.1902763
+2025-04-21 20:12:23,043 | INFO     |: POS ERROR        : (-0.920, -0.405, 4961.111)
+2025-04-21 20:12:23,044 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:12:26,763 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:12:26,783 | INFO     |: GT index      : (5, 3, 2)
+2025-04-21 20:12:26,784 | INFO     |: Bel index     : (5, 3, 2) with prob = 1.0
+2025-04-21 20:12:26,785 | INFO     |: Bel_bar prob at index = 0.0019710467686404097
+2025-04-21 20:12:26,785 | INFO     |: GT            : (-0.005, -0.100, 5271.112)
+2025-04-21 20:12:26,786 | INFO     |: Belief        : (0.000, -0.305, -130.000)
+2025-04-21 20:12:26,786 | INFO     |: POS ERROR     : (-0.005, 0.205, 5401.112)
+2025-04-21 20:12:26,787 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+----------------- 14 -----------------
+2025-04-21 20:12:29,911 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:12:29,928 | INFO     |: GT index         : (4, 3, 1)
+2025-04-21 20:12:29,929 | INFO     |: Prior Bel index  : (4, 0, 4) with prob = 1.3597352
+2025-04-21 20:12:29,930 | INFO     |: POS ERROR        : (-0.070, 0.966, 5338.188)
+2025-04-21 20:12:29,933 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:12:33,316 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:12:33,318 | INFO     |: GT index      : (4, 3, 1)
+2025-04-21 20:12:33,319 | INFO     |: Bel index     : (4, 3, 1) with prob = 1.0
+2025-04-21 20:12:33,319 | INFO     |: Bel_bar prob at index = 0.010819176195519349
+2025-04-21 20:12:33,320 | INFO     |: GT            : (-0.375, -0.253, 5608.189)
+2025-04-21 20:12:33,320 | INFO     |: Belief        : (-0.305, -0.305, -150.000)
+2025-04-21 20:12:33,321 | INFO     |: POS ERROR     : (-0.070, 0.052, 5758.189)
+2025-04-21 20:12:33,321 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+----------------- 15 -----------------
+2025-04-21 20:12:36,407 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:12:36,425 | INFO     |: GT index         : (3, 3, 0)
+2025-04-21 20:12:36,426 | INFO     |: Prior Bel index  : (4, 0, 4) with prob = 1.3597639
+2025-04-21 20:12:36,426 | INFO     |: POS ERROR        : (-0.463, 0.969, 5675.265)
+2025-04-21 20:12:36,427 | INFO     |: ---------- PREDICTION STATS -----------
+2025-04-21 20:12:40,311 | INFO     |: ---------- UPDATE STATS -----------
+2025-04-21 20:12:40,325 | INFO     |: GT index      : (3, 3, 0)
+2025-04-21 20:12:40,326 | INFO     |: Bel index     : (2, 3, 0) with prob = 0.9999858
+2025-04-21 20:12:40,326 | INFO     |: Bel_bar prob at index = 0.1685306356398619
+2025-04-21 20:12:40,327 | INFO     |: GT            : (-0.768, -0.250, 5945.265)
+2025-04-21 20:12:40,329 | INFO     |: Belief        : (-0.914, -0.305, -170.000)
+2025-04-21 20:12:40,331 | INFO     |: POS ERROR     : (0.146, 0.055, 6115.265)
+2025-04-21 20:12:40,332 | INFO     |: ---------- UPDATE STATS -----------
+-------------------------------------
+
+
+                    </code>
+                    </pre>
+
+            </div>
         </section>
 
 
