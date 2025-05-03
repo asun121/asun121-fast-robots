@@ -42,6 +42,7 @@
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 8">Lab 8</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 9">Lab 9</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 10">Lab 10</a></li>
+                <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 11">Lab 11</a></li>
 
             </ul>
         </div>
@@ -2895,6 +2896,178 @@
                     </pre>
 
             </div>
+        </section>
+
+
+        <section class="resume-section" id="Lab 11">
+            <div class="resume-section-content">
+                <h2 class="mb-0">Lab 11</h2>
+                <p>
+                    In this lab, we take our simulated localization and apply it to the real robot. To start, we verify that our 
+                    Bayes fitler is working correctly by running it on the simulated robot. The following screenshot 
+                    shows a simulated run in the maze. While the odometry is not perfect, the belief (blue) is able to follow the ground truth (green) well:
+                </p>
+                
+                <img src="assets/img/lab11/run sim.png" alt="Bayes Filter Simulation" width="600"
+                    class="center-image">
+                
+                    <p> For this lab, we take the robot and perform the same scan we did in Lab 9. We do this in a set of marked spots and 
+                        then run the Bayes filter on the data to get an estimate of the robots position. On the arduino side, we can reuse most of the 
+                        code except for a few changes. First, we change the format of the data we send back. We only want to return the ToF and yaw values. 
+                        We also change the amount of scans to 18 for 20 degree increments. The workflow for this lab was as follows: Place the robot in a marked spot, run the scan,
+                        and then run the Bayes filter on the data, reset the ToF and yaw arrays.
+                    </p>
+                    <pre>
+                    <code>
+                        case LOCALIZE:
+                        {
+                          int curr_pwm = 0;
+                          int setpoint = yaw;
+                          int start_time = millis();
+                          int scans = 0;
+                          int i = 0;
+                  
+                          while (scans < 18) {
+                            poll_dmt();
+                            start_time = millis();
+                            while (millis() - start_time < 1000) {
+                              curr_pwm = PID_Turn(yaw, setpoint);
+                              poll_dmt();
+                            }
+                            diff_drive(0, 0);
+                            int dist = 0;
+                            for (int i = 0; i < 3; i++) {
+                              while (!distanceSensor.checkForDataReady()) {
+                                delay(1);
+                              }
+                              dist += distanceSensor.getDistance();
+                            }
+                  
+                            dist /= 3;
+                  
+                            if (i < max_arr) {
+                              yaw_arr[i] = yaw;
+                              tof_ranges[i] = dist;
+                              i++;
+                            }
+                  
+                  
+                            setpoint = (setpoint + 20) % 360;
+                            integral = 0.0;  // reset integral term for next pid turn
+                            scans++;
+                          }
+                  
+                  
+                          Serial.println("End Scan drive");
+                  
+                  
+                          Serial.println("Sending Back");
+                          char temp[20];  // Temporary buffer to hold the string
+                  
+                          for (int j = 0; j < i; j++) {
+                            tx_estring_value.clear();
+                  
+                            tx_estring_value.append((float)tof_ranges[j]);
+                  
+                            tx_estring_value.append("|");
+                            tx_estring_value.append((float)yaw_arr[j]);
+                  
+                            tx_characteristic_string.writeValue(tx_estring_value.c_str());
+                          }
+                          Serial.println("Finish send");
+                          break;
+                        }
+                  
+                    </code>
+                    </pre>
+
+                    <p> On the python side, we perform the observation loop with the below function. First we reset our arrays then start a new notification handler. 
+                        We can then send our localization command which will start the scan. After I measured the time it took to do a full scan, I set the 
+                        code to sleep for 35 seconds to wait for completion. I then need to reverse the arrays as my scan performs a 360 degree turn in the opposite direction 
+                        than is expected by the filter. After normalizing the yaws and ToFs to 360 degrees and meters respectively, we return the arrays. 
+                        </p>
+                    <pre>
+                    <code>
+                        async def perform_observation_loop(self, rot_vel=120):
+                        """Perform the observation loop behavior on the real robot, where the robot does  
+                        a 360 degree turn in place while collecting equidistant (in the angular space) sensor
+                        readings, with the first sensor reading taken at the robot's current heading. 
+                        The number of sensor readings depends on "observations_count"(=18) defined in world.yaml.
+                        
+                        Keyword arguments:
+                            rot_vel -- (Optional) Angular Velocity for loop (degrees/second)
+                                        Do not remove this parameter from the function definition, even if you don't use it.
+                        Returns:
+                            sensor_ranges   -- A column numpy array of the range values (meters)
+                            sensor_bearings -- A column numpy array of the bearings at which the sensor readings were taken (degrees)
+                                               The bearing values are not used in the Localization module, so you may return a empty numpy array
+                        """
+                        tofs = []
+                        yaws = []
+                
+                        def notification_handler_temps(uiud, byte_array):
+                            s = ble.bytearray_to_string(byte_array)
+                            temp_arr = s.split("|")
+                            tofs.append(temp_arr[0])
+                            yaws.append(temp_arr[1])
+                            
+                        ble.start_notify(ble.uuid['RX_STRING'], notification_handler_temps)
+                
+                        ble.send_command(CMD.LOCALIZE, '')
+                
+                        await asyncio.sleep(35)
+                
+                            
+                        ble.stop_notify(ble.uuid['RX_STRING'])
+                
+                        tof_f = np.array(tofs[::-1], dtype=float) # reverse tof array as we are turning the opposite way
+                        yaw_f = np.array(yaws[::-1], dtype=float)
+                        yaw_normalized = 360 - ((yaw_f - yaw_f[0]) % 360)
+                        
+                        sensor_ranges = np.array(tof_f / 1000)[np.newaxis].T
+                        sensor_bearings = np.array(yaw_normalized)[np.newaxis].T
+                
+                        print(sensor_bearings)
+                        print(sensor_ranges)
+                
+                        return sensor_ranges, sensor_bearings
+                    </code>
+                    </pre> 
+
+                    <h3 class="mb-0">Results</h3>
+                    <p> After testing, I was able to find the localization beliefs of the robot in 4 positions in the maze. The green represents the GT 
+                        and the blue represents the belief of the robot. </p>
+                    <b>Point: (0,3)</b>
+                    <img src="assets/img/lab11/best 0,3 plot.png" alt="Bayes Filter Simulation" width="600"
+                        class="center-image">
+                    <img src="assets/img/lab11/best 0,3 print.png" alt="Bayes Filter Simulation" width="600"
+                        class="center-image">                    
+                    <b>Point: (-3,-2)</b>
+                    <img src="assets/img/lab11/good -3,-2 plot.png" alt="Bayes Filter Simulation" width="600"
+                        class="center-image">
+                    <img src="assets/img/lab11/good -3,-2.png" alt="Bayes Filter Simulation" width="600"
+                        class="center-image">    
+                        
+                    <b>Point: (5,-3)</b>
+                    <img src="assets/img/lab11/good 5,-3 plot.png" alt="Bayes Filter Simulation" width="600"
+                        class="center-image">
+                    <img src="assets/img/lab11/good 5,-3.png" alt="Bayes Filter Simulation" width="600" class="center-image">
+
+                    <b>Point: (5,3)</b>
+                    <img src="assets/img/lab11/good 5,3 plot.png" alt="Bayes Filter Simulation" width="600"
+                        class="center-image">
+                    <img src="assets/img/lab11/good 5,3.png" alt="Bayes Filter Simulation" width="600" class="center-image">
+
+                    <h3 class="mb-0">Discussion</h3>
+                    <p> Overall, the robot was able to localize itself well in the maze. Initially, I had a lot of trouble because I had flipped 
+                        the rotation of the robot however I resolved this by reversing the arrayys. In addition, I also had to increase the sensor sigma. 
+                        Interestingly, the robot is able to localize itself extremely well at point (-3,-2) however was slightly off at the other points. After 
+                        reflecting on my code, I realized that I had a slight issue with flipping the yaws. Because the robot starts measuring at 0 degrees, the 
+                        last value in the array (which would be the first value in the Bayes filter) is actually at 20 degrees. This would cause the robot to be slightly off.
+                        I believe that I inadvertantly fixed this for (-3,-2) as I has misaligned the robot a bit.
+                    </p>
+            </div>
+
         </section>
 
 
