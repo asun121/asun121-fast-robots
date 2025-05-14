@@ -43,6 +43,7 @@
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 9">Lab 9</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 10">Lab 10</a></li>
                 <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 11">Lab 11</a></li>
+                <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#Lab 12">Lab 12</a></li>
 
             </ul>
         </div>
@@ -2613,11 +2614,11 @@
                 <iframe width="560" height="315" src="https://www.youtube.com/embed/dCabTiyTMOg" frameborder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen></iframe>
-                
+
                 <p>
                     I also got a log of the data from the simulation shown in the below:
-                    </p>
-                    <pre>
+                </p>
+                <pre>
                     <code>
                     
 ----------------- 0 -----------------
@@ -2903,21 +2904,26 @@
             <div class="resume-section-content">
                 <h2 class="mb-0">Lab 11</h2>
                 <p>
-                    In this lab, we take our simulated localization and apply it to the real robot. To start, we verify that our 
-                    Bayes fitler is working correctly by running it on the simulated robot. The following screenshot 
-                    shows a simulated run in the maze. While the odometry is not perfect, the belief (blue) is able to follow the ground truth (green) well:
+                    In this lab, we take our simulated localization and apply it to the real robot. To start, we verify
+                    that our
+                    Bayes fitler is working correctly by running it on the simulated robot. The following screenshot
+                    shows a simulated run in the maze. While the odometry is not perfect, the belief (blue) is able to
+                    follow the ground truth (green) well:
                 </p>
-                
-                <img src="assets/img/lab11/run sim.png" alt="Bayes Filter Simulation" width="600"
-                    class="center-image">
-                
-                    <p> For this lab, we take the robot and perform the same scan we did in Lab 9. We do this in a set of marked spots and 
-                        then run the Bayes filter on the data to get an estimate of the robots position. On the arduino side, we can reuse most of the 
-                        code except for a few changes. First, we change the format of the data we send back. We only want to return the ToF and yaw values. 
-                        We also change the amount of scans to 18 for 20 degree increments. The workflow for this lab was as follows: Place the robot in a marked spot, run the scan,
-                        and then run the Bayes filter on the data, reset the ToF and yaw arrays.
-                    </p>
-                    <pre>
+
+                <img src="assets/img/lab11/run sim.png" alt="Bayes Filter Simulation" width="600" class="center-image">
+
+                <p> For this lab, we take the robot and perform the same scan we did in Lab 9. We do this in a set of
+                    marked spots and
+                    then run the Bayes filter on the data to get an estimate of the robots position. On the arduino
+                    side, we can reuse most of the
+                    code except for a few changes. First, we change the format of the data we send back. We only want to
+                    return the ToF and yaw values.
+                    We also change the amount of scans to 18 for 20 degree increments. The workflow for this lab was as
+                    follows: Place the robot in a marked spot, run the scan,
+                    and then run the Bayes filter on the data, reset the ToF and yaw arrays.
+                </p>
+                <pre>
                     <code>
                         case LOCALIZE:
                         {
@@ -2981,12 +2987,16 @@
                     </code>
                     </pre>
 
-                    <p> On the python side, we perform the observation loop with the below function. First we reset our arrays then start a new notification handler. 
-                        We can then send our localization command which will start the scan. After I measured the time it took to do a full scan, I set the 
-                        code to sleep for 35 seconds to wait for completion. I then need to reverse the arrays as my scan performs a 360 degree turn in the opposite direction 
-                        than is expected by the filter. After normalizing the yaws and ToFs to 360 degrees and meters respectively, we return the arrays. 
-                        </p>
-                    <pre>
+                <p> On the python side, we perform the observation loop with the below function. First we reset our
+                    arrays then start a new notification handler.
+                    We can then send our localization command which will start the scan. After I measured the time it
+                    took to do a full scan, I set the
+                    code to sleep for 35 seconds to wait for completion. I then need to reverse the arrays as my scan
+                    performs a 360 degree turn in the opposite direction
+                    than is expected by the filter. After normalizing the yaws and ToFs to 360 degrees and meters
+                    respectively, we return the arrays.
+                </p>
+                <pre>
                     <code>
                         async def perform_observation_loop(self, rot_vel=120):
                         """Perform the observation loop behavior on the real robot, where the robot does  
@@ -3032,44 +3042,389 @@
                 
                         return sensor_ranges, sensor_bearings
                     </code>
-                    </pre> 
+                    </pre>
 
-                    <h3 class="mb-0">Results</h3>
-                    <p> After testing, I was able to find the localization beliefs of the robot in 4 positions in the maze. The green represents the GT 
-                        and the blue represents the belief of the robot. </p>
-                    <b>Point: (0,3)</b>
-                    <img src="assets/img/lab11/best 0,3 plot.png" alt="Bayes Filter Simulation" width="600"
-                        class="center-image">
-                    <img src="assets/img/lab11/best 0,3 print.png" alt="Bayes Filter Simulation" width="600"
-                        class="center-image">                    
-                    <b>Point: (-3,-2)</b>
-                    <img src="assets/img/lab11/good -3,-2 plot.png" alt="Bayes Filter Simulation" width="600"
-                        class="center-image">
-                    <img src="assets/img/lab11/good -3,-2.png" alt="Bayes Filter Simulation" width="600"
-                        class="center-image">    
-                        
-                    <b>Point: (5,-3)</b>
-                    <img src="assets/img/lab11/good 5,-3 plot.png" alt="Bayes Filter Simulation" width="600"
-                        class="center-image">
-                    <img src="assets/img/lab11/good 5,-3.png" alt="Bayes Filter Simulation" width="600" class="center-image">
+                <h3 class="mb-0">Results</h3>
+                <p> After testing, I was able to find the localization beliefs of the robot in 4 positions in the maze.
+                    The green represents the GT
+                    and the blue represents the belief of the robot. </p>
+                <b>Point: (0,3)</b>
+                <img src="assets/img/lab11/best 0,3 plot.png" alt="Bayes Filter Simulation" width="600"
+                    class="center-image">
+                <img src="assets/img/lab11/best 0,3 print.png" alt="Bayes Filter Simulation" width="600"
+                    class="center-image">
+                <b>Point: (-3,-2)</b>
+                <img src="assets/img/lab11/good -3,-2 plot.png" alt="Bayes Filter Simulation" width="600"
+                    class="center-image">
+                <img src="assets/img/lab11/good -3,-2.png" alt="Bayes Filter Simulation" width="600"
+                    class="center-image">
 
-                    <b>Point: (5,3)</b>
-                    <img src="assets/img/lab11/good 5,3 plot.png" alt="Bayes Filter Simulation" width="600"
-                        class="center-image">
-                    <img src="assets/img/lab11/good 5,3.png" alt="Bayes Filter Simulation" width="600" class="center-image">
+                <b>Point: (5,-3)</b>
+                <img src="assets/img/lab11/good 5,-3 plot.png" alt="Bayes Filter Simulation" width="600"
+                    class="center-image">
+                <img src="assets/img/lab11/good 5,-3.png" alt="Bayes Filter Simulation" width="600"
+                    class="center-image">
 
-                    <h3 class="mb-0">Discussion</h3>
-                    <p> Overall, the robot was able to localize itself well in the maze. Initially, I had a lot of trouble because I had flipped 
-                        the rotation of the robot however I resolved this by reversing the arrayys. In addition, I also had to increase the sensor sigma. 
-                        Interestingly, the robot is able to localize itself extremely well at point (-3,-2) however was slightly off at the other points. After 
-                        reflecting on my code, I realized that I had a slight issue with flipping the yaws. Because the robot starts measuring at 0 degrees, the 
-                        last value in the array (which would be the first value in the Bayes filter) is actually at 20 degrees. This would cause the robot to be slightly off.
-                        I believe that I inadvertantly fixed this for (-3,-2) as I has misaligned the robot a bit.
-                    </p>
+                <b>Point: (5,3)</b>
+                <img src="assets/img/lab11/good 5,3 plot.png" alt="Bayes Filter Simulation" width="600"
+                    class="center-image">
+                <img src="assets/img/lab11/good 5,3.png" alt="Bayes Filter Simulation" width="600" class="center-image">
+
+                <h3 class="mb-0">Discussion</h3>
+                <p> Overall, the robot was able to localize itself well in the maze. Initially, I had a lot of trouble
+                    because I had flipped
+                    the rotation of the robot however I resolved this by reversing the arrayys. In addition, I also had
+                    to increase the sensor sigma.
+                    Interestingly, the robot is able to localize itself extremely well at point (-3,-2) however was
+                    slightly off at the other points. After
+                    reflecting on my code, I realized that I had a slight issue with flipping the yaws. Because the
+                    robot starts measuring at 0 degrees, the
+                    last value in the array (which would be the first value in the Bayes filter) is actually at 20
+                    degrees. This would cause the robot to be slightly off.
+                    I believe that I inadvertantly fixed this for (-3,-2) as I has misaligned the robot a bit.
+                </p>
             </div>
 
         </section>
 
+
+
+
+        <section class="resume-section" id="Lab 12">
+            <div class="resume-section-content">
+                <h2 class="mb-0">Lab 12</h2>
+                <p>
+                    In this lab, we attempt to navigate the robot through a path utilizing the PID control and
+                    localization we have developed
+                    in the previous labs. The goal is to have the robot navigate through a set of waypoints in an
+                    environment. We start by developing a
+                    turn-go-turn method with PID controlled turns and drives.
+                </p>
+                <h3 class="mb-0">PID Control</h3>
+                <p>
+                    In order to utilize a turn-go-turn method, we need to have reliable PID control for the robots
+                    orientation and distance. For the orientation,
+                    we utilize the same PID_Turn function we developed in the previous lab. This function utilizes the
+                    DMP onboard the robot to get the yaw. For the
+                    distance, we utilize PID control on the ToF sensor. In order to chain these, we do this on the
+                    python side, sending BLE commands back to back. We perform
+                    this on the python side as it is easier to quickly change the parameters and test different values
+                    without having to reflash.
+                </p>
+                <pre>
+                    <code>
+                        # Drive Chain
+                        ble.send_command(CMD.DRIVE, "600") 
+                        ble.send_command(CMD.TURN, "95") 
+                    </code>
+                </pre>
+                <h4 class="mb-0">CMD.DRIVE</h4>
+                <p>
+                    The CMD.DRIVE command is used to drive the robot forward to a specified distance from the wall using
+                    PID. This distance is measured by the ToF sensor in mm.
+                </p>
+                <h4 class="mb-0">CMD.TURN</h4>
+                <p>
+                    The CMD.TURN command is used to turn the robot to a specified angle using PID. This angle is
+                    measured by the DMP onboard the IMU.
+                </p>
+
+                <h3 class="mb-0">Open Loop Navigation</h3>
+
+                <p>The below video shows one of our first successful runs with a chain of drive and turn commands. While
+                    this was very fast, the robot drifts a ton and it was unable to hit the specified waypoints well.
+                </p>
+                <iframe width="560" height="315"
+                    src="https://www.youtube.com/embed?v=n5-e8OPfkHM&list=PLKEL7YzGCmGQjY7IKNTtMIHVWbWZGG1rG&index=34"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+
+                <p>After this, we needed to change a couple things. First, we added a delay in between sending BLE
+                    commands. This ensured that the robot comes to a
+                    complete stop before the next command is sent. This will help us mitigate the drift we see in the
+                    robot.
+                </p>
+                <pre>
+                    <code>
+                        # Drive Chain
+                        ble.send_command(CMD.DRIVE, "600") 
+                        await asyncio.sleep(6)
+                        ble.send_command(CMD.TURN, "95") 
+                    </code>
+                </pre>
+
+                <p>We also spent significant time tuning the PID parameters for the drive and turn commands. For the
+                    drive command, we noticed heavy overshoot so we detuned the P term.
+                    In addition, we also added 2 new tunable parameters to the drive tuning: max PWM and drive
+                    differential. Because small errors significantly accumulate, we needed to add as many
+                    tunable parameters to ensure accurate driving. The max PWM is the PWM cap of the motors to help
+                    mitigate overshoot and the drive differential is the difference between left and right motors
+                    to prevent side to side drift when driving in a straight line. For the turn command, we added an
+                    extra floor PWM parameter. This ensures that the robot
+                    will always turn at least at some rate. The below shows our open loop drive chain. Each of the
+                    distances were measured to place the robot roughly at the waypoints.
+                </p>
+
+                <pre>
+                    <code>
+                        ble.send_command(CMD.TUNE_PID, "0.009|0.00|0.0|135|1.3") # P I D max_pwm drive_diff
+                        ble.send_command(CMD.TUNE_TURN, "0.9|0.0|0.1|75") # P I D floor_pwm
+
+                        # Drive Chain
+
+                        ble.send_command(CMD.DRIVE, "600") 
+                        await asyncio.sleep(6)
+
+                        ble.send_command(CMD.TURN, "90") 
+
+                        await asyncio.sleep(3)
+
+
+                        ble.send_command(CMD.DRIVE, "1500") # first long
+                        await asyncio.sleep(7)
+
+                        ble.send_command(CMD.TURN, "180") 
+                        await asyncio.sleep(3)
+
+                        ble.send_command(CMD.DRIVE, "450") 
+                        await asyncio.sleep(7)
+
+                        ble.send_command(CMD.TURN, "90") 
+                        await asyncio.sleep(3)
+
+                        ble.send_command(CMD.DRIVE, "300") # Turn before back straight
+                        await asyncio.sleep(7) 
+
+                        ble.send_command(CMD.TURN, "0") 
+                        await asyncio.sleep(3)
+
+
+                        ble.send_command(CMD.DRIVE, "450") # Back straight
+                        await asyncio.sleep(6)
+
+
+                        ble.send_command(CMD.TURN, "270") 
+                        await asyncio.sleep(3)
+
+                        ble.send_command(CMD.DRIVE, "700") # Round the final
+
+                        await asyncio.sleep(7)
+                        ble.send_command(CMD.TURN, "180") 
+                        await asyncio.sleep(3)
+
+                        ble.send_command(CMD.DRIVE, "600") # End
+
+                    </code>
+                </pre>
+
+                <p>
+                    After tuning the parameters, we were able to get a much more reliable drive and turn that hits the
+                    waypoints. The below video shows a successful run of the robot navigating through a path with the
+                    tuned parameters. Unfortunately we miss the penultimate waypoint by a bit. This is because we
+                    suffered a bit of overshoot on the last turn.
+                </p>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/Vr6S9dSkivw?si=evBpHbheo6WfW5Dt"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+
+                <h3 class="mb-0">Localization Navigation</h3>
+                <p>Once we had an open loop run, we wanted to utilize localization to correct for errors in our
+                    position. We first need to implement a function to localize the robot and return the current belief.
+                    We then take this belief
+                    and use it to adjust our position. The below localize_point function will return the current belief.
+                </p>
+                <pre>
+                    <code>
+                        async def localize_point():
+                            # Get Observation Data by executing a 360 degree rotation motion
+                            ble.send_command(CMD.TURN, "270")
+                            ble.send_command(CMD.TUNE_TURN, "6.5|0.0|0.007|35") # best with a bit of steady state
+                            await loc.get_observation_data()
+
+                            
+                            # Run Update Step
+                            loc.update_step()
+                            loc.plot_update_step_data(plot_data=True)
+                            
+                            max_bel_idx = get_max(loc.bel)
+                            curr_pose = mapper.from_map(*max_bel_idx[0])
+                            ble.send_command(CMD.TUNE_TURN, "0.9|0.0|0.1|75") # best with a bit of steady state
+
+                            #return curr_pose 
+                            ft_pose = np.rint(np.array(curr_pose) * 3.28084).astype(int)
+                            return ft_pose
+                    </code>
+                </pre>
+                <p>This function performs a couple things to reliably get a localization. First, we turn the robot to
+                    270 degrees (which in our reference frame is defined at the proper
+                    orientation for localization). With this, we then change our PID turn parameters at runtime. The
+                    reason for this is because our PID turn parameters worked very well
+                    for the localization lab. Instead of spending more time tuning the parameters to work for both large
+                    90 degree turns and small 20 degree turns, we simply
+                    change the parameters at runtime when we want to localize. We run the scan and filter to get the
+                    belief of the current position in python and return
+                    the current position in feet. We also retune the PID turn parameters to our normal values. While
+                    this belief won't give us the exact position of the robot, we will be able to confirm if we are in
+                    the right grid space.
+                </p>
+
+                <figure>
+                    <img src="assets/img/lab12/Untitled drawing.png" alt="Nav Diagram" width="600" class="center-image">
+                    <figcaption style="text-align: center;">Flowchart for localization.</figcaption>
+                </figure>
+
+                <p> We can implement the new navigation chain with localization and correction following the figure
+                    above. We choose to localize at 2 points: (2,-3) and (0,0). This is because these were
+                    the locations we had the most errors reaching in our testing. Once the drive chain is expected to be
+                    at (2,-3), we localize
+                    the position. If the position is not at (2,-3), we reorient the robot by turning towards the wall
+                    and realigning the ToF distances. We perform the
+                    same process at the origin as well. While we could have localized again after reorienting the robot
+                    to confirm the reorientation was successful, we decided not to as we wanted to keep the run time
+                    low.
+                    In addition, we could have localized at every point however we wanted to save time. The below shows
+                    the drive chain with localization and reorientation.
+                </p>
+
+                <pre>
+                    <code>
+                        # Drive Chain
+
+                        ble.send_command(CMD.DRIVE, "600") 
+                        await asyncio.sleep(6)
+
+                        ble.send_command(CMD.TURN, "95") 
+
+
+                        await asyncio.sleep(3)
+
+                        ble.send_command(CMD.DRIVE, "1500") # first long
+                        await asyncio.sleep(7)
+
+                        ble.send_command(CMD.TURN, "180") 
+                        await asyncio.sleep(3)
+
+                        ble.send_command(CMD.DRIVE, "450") 
+                        await asyncio.sleep(7)
+
+                        ####### LOCALIZE AT POINT 2,-3 ###########
+
+                        estimated_two_neg_3 = await localize_point()
+
+                        if estimated_two_neg_3[0] != 2: # If not at 2, we drive the robot to 2
+                            ble.send_command(CMD.TURN, "90") 
+                            await asyncio.sleep(3)
+                            ble.send_command(CMD.DRIVE, "1200") 
+                            
+                        if estimated_two_neg_3[1] != -3: # If not at -3, we drive the robot to negative 3
+                            ble.send_command(CMD.TURN, "180")
+                            await asyncio.sleep(3)
+                            ble.send_command(CMD.DRIVE, "450") 
+
+
+                        ######## END LOCALIZE ########
+
+                        ble.send_command(CMD.TURN, "90") 
+                        await asyncio.sleep(3)
+
+                        ble.send_command(CMD.DRIVE, "300") # Turn before back straight
+                        await asyncio.sleep(7) 
+
+                        ble.send_command(CMD.TURN, "0") 
+                        await asyncio.sleep(3)
+
+
+                        ble.send_command(CMD.DRIVE, "450") # Back straight
+                        await asyncio.sleep(6)
+
+
+                        ble.send_command(CMD.TURN, "270") 
+                        await asyncio.sleep(3)
+
+                        ble.send_command(CMD.DRIVE, "700") # Round the final
+
+                        await asyncio.sleep(7)
+                        ble.send_command(CMD.TURN, "180") 
+                        await asyncio.sleep(3)
+
+                        ble.send_command(CMD.DRIVE, "600") # End
+
+                        ####### LOCALIZE AT Origin ###########
+
+                        estimated_origin = await localize_point()
+
+                        if estimated_origin[0] != 0: # If not at 0, we drive the robot to 0
+                            ble.send_command(CMD.TURN, "90") 
+                            await asyncio.sleep(3)
+                            ble.send_command(CMD.DRIVE, "600") 
+                            
+                        if estimated_origin[1] != 0: # If not at 0, we drive the robot to 0
+                            ble.send_command(CMD.TURN, "180")
+                            await asyncio.sleep(3)
+                            ble.send_command(CMD.DRIVE, "650") 
+
+
+                        ######## END LOCALIZE ########
+
+                        
+                    </code>
+                </pre>
+                <p>After implementing this, we were able to get our best run.</p>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/DZ0ikk1VIiA?si=HF6RxHDBNUD_zLA2"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+                <p>Looking at the data, we can see the beliefs of the 2 positions we localize at. In this run, we notice
+                    that when we localize at (2,-3), the localization tells us that we are at the point. We do not have
+                    to realign. At the origin however, we are slightly off
+                    so we must realign the robot. While the robot wasn't exactly off the origin, the realignment would
+                    not harm the robots position as we
+                    are just rerunning our PID drive to align us at the proper distance from the wall.
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <img src="assets/img/lab12/best localization.png" alt="Localization at (2,-3)"
+                            class="img-fluid" />
+                        <p class="text-center">Plotted Localization Points</p>
+                    </div>
+                    <div class="col-md-6">
+                        <img src="assets/img/lab12/best localization print.png" alt="Localization at (0,0)"
+                            class="img-fluid" />
+                        <p class="text-center">Calculated Beliefs</p>
+                    </div>
+                </div>
+
+
+                <h3 class="mb-0">Discussion</h3>
+                <h4 class="mb-0">DMP drift</h4>
+                <p>
+                    An issue we had with the DMP was that it would drift especially on startup. While normally this
+                    would not be a significant issue,
+                    even slight amounts of drift would cause significant changes in course when driving the long
+                    straights.
+                </p>
+                <h4 class="mb-0">ToF Struggles</h4>
+                <p>A major struggle we had was with the ToF sensor. Very often when pointing over long ranges it would
+                    pick up the ground or go
+                    base the back wall. To mitigate this, we remounted the ToF sensor to be flush with the car. In
+                    addition, we changed the ToF mode
+                    to long range mode.
+                </p>
+                <p>Overall, we are happy with the results of this lab. We were able to get solid open loop and
+                    localization runs, despite the localization
+                    not being exactly in the right spot for the origin. We were able to demonstrate that the
+                    localization can be used to reorient the robot position.
+                </p>
+
+                <h3 class="mb-0">Collaboration</h3>
+
+                <p> Sean Zhang and I worked together on this lab.
+                </p>
+            </div>
+
+        </section>
 
     </div>
     <!-- Bootstrap core JS-->
